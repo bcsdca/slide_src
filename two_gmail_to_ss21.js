@@ -51,7 +51,7 @@
 function two_gmail_to_ss21() {
   //max # of characters per announcement page is 160(7 lines) for calibri 50 fonts
   //and using "。" as a splitter
-  var max_c_per_anno_page = 135;
+  var max_c_per_anno_page = 142;
   var today = new Date();
   var today_temp = new Date();
   var coming_sunday_offset_from_today = 7 - today.getDay()
@@ -143,10 +143,14 @@ function two_gmail_to_ss21() {
     var cant_message_length = cant_threads[0].getMessages().length;
     for (var j = 0; j < cant_message_length; j++) {
       var cant_message = cant_message.concat(cant_threads[0].getMessages()[j].getPlainBody());
+      //var cant_message = cant_threads[0].getMessages()[j].getPlainBody().concat(cant_message);
+      //console.log(arguments.callee.name + ": The %d message of this thread is \"%s\"", j, cant_threads[0].getMessages()[j].getPlainBody() );
     }
 
-    console.log(arguments.callee.name
-      + ": The Cantonese worship reminder email subject is \"%s\", and it's email message length is %d", cant_threads[0].getMessages()[0].getSubject(), cant_message_length)
+    console.log(arguments.callee.name + ": The Cantonese worship reminder email subject is \"%s\", and it's email message length is %d", cant_threads[0].getMessages()[0].getSubject(), cant_message_length);
+
+    //console.log(arguments.callee.name + ": The Cantonese worship reminder email message is \"%s\"", cant_message);
+
 
   } catch (err) {
     console.error(arguments.callee.name + ': GmailApp.search thread error : Cantonese Sunday Service Reminder' + err);
@@ -252,6 +256,7 @@ function two_gmail_to_ss21() {
     //}
 
     var cant_msg = cant_message.split("\r");
+    //var cant_msg = cant_message.split("\n");
     console.log(arguments.callee.name + ": The cantonese worship gmail thread, with all messages is: %s ", cant_msg)
 
     var find_it = false;
@@ -259,7 +264,9 @@ function two_gmail_to_ss21() {
       //peggy has done this on "Call to Worship: 希伯來書 Hebrews 4:12-16" on 2/10/2023
       //so change it to case insensitive match
       //psalm 1xx is used by example invocation format will be eliminated here
-      if ((cant_msg[j].match(/Call\s*to\s*worship/i)) && (!cant_msg[j].match("1xx"))) {
+      if ((cant_msg[j].match(/Call\s*to\s*worship[:]/i)) && (!cant_msg[j].match("1xx"))) {
+      //if ((cant_msg[j].match(/Call\s*to\s*worship/i)) && (!cant_msg[j].match("1xx"))) {
+        //console.log(arguments.callee.name + ": The invocation line is %s", cant_msg[j]);
         var array_invo_passage = parse_invocation1(cant_msg[j]);
         console.log(arguments.callee.name + ": The passage to read are %s, and the number of passage to read is %d ", array_invo_passage, array_invo_passage.length)
 
