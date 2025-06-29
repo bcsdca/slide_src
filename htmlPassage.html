@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Selector</title>
+  <style>
+    /* General body styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+      /* Keeping your original background color */
+      color: #333;
+      /* Keeping your original text color */
+    }
+
+    .indented {
+      margin-left: 30px;
+      /* Adjust this value to control the indent */
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    /* Container for the form elements */
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+
+    label {
+      font-weight: bold;
+      color: #34495e;
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      /* Keeping 10px padding from the second style */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      /* Font size is 16px in both styles, so we keep it */
+      margin: 10px 0 20px 10px;
+      /* Merging both margin definitions: margin-top and margin-left from the first, margin-bottom from the second */
+      background-color: #f9f9f9;
+      /* Background color from the second style */
+      color: #333;
+      /* Color from the second style */
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      select,
+      button {
+        font-size: 14px;
+      }
+    }
+
+    /* Style for From Verse and From Chapter dropdown */
+    #from-chapter,
+    #from-verse {
+      background-color: #f0f8ff;
+      /* Light blue color */
+      color: #000;
+      /* Black text for contrast */
+      border: 2px solid #00bfff;
+      /* Blue border for visibility */
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    /* Style for To Verse and To chapter dropdown */
+    #to-chapter,
+    #to-verse {
+      background-color: #ffe4e1;
+      /* Light pink color */
+      color: #000;
+      /* Black text for contrast */
+      border: 2px solid #ff7f7f;
+      /* Pink border for visibility */
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    #bible-book {
+      color: #1B5E20;
+      /* Even darker green color */
+      background-color: #f0f8ff;
+      /* Change background color to light blue */
+      font-weight: bold;
+      /* Make text bold */
+      font-size: 16px;
+      /* Set font size */
+      font-family: 'Arial', sans-serif;
+      /* Set font family */
+      border: 1px solid #ccc;
+      /* Optional: Add a border */
+      border-radius: 5px;
+      /* Optional: Rounded corners */
+      padding: 5px;
+      /* Optional: Padding inside the box */
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-spinner {
+      border: 3px solid rgba(255, 0, 0, 0.3); /* Red with transparency */
+      border-top: 3px solid red; /* Solid red spinner */
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Select Chapters/Verses</h1>
+    <!-- Dropdown for Bible Books -->
+    <label for="bible-book">Select Bible Book:</label>
+    <select id="bible-book" onchange="updateChapters()">
+        <option value="">--Please Select--</option>
+        <!-- Old Testament -->
+        <option value="創世記">創世記</option>
+        <option value="出埃及記">出埃及記</option>
+        <option value="利未記">利未記</option>
+        <option value="民數記">民數記</option>
+        <option value="申命記">申命記</option>
+        <option value="約書亞記">約書亞記</option>
+        <option value="士師記">士師記</option>
+        <option value="路得記">路得記</option>
+        <option value="撒母耳記上">撒母耳記上</option>
+        <option value="撒母耳記下">撒母耳記下</option>
+        <option value="列王紀上">列王紀上</option>
+        <option value="列王紀下">列王紀下</option>
+        <option value="歷代志上">歷代志上</option>
+        <option value="歷代志下">歷代志下</option>
+        <option value="以斯拉記">以斯拉記</option>
+        <option value="尼希米記">尼希米記</option>
+        <option value="以斯帖記">以斯帖記</option>
+        <option value="約伯記">約伯記</option>
+        <option value="詩篇">詩篇</option>
+        <option value="箴言">箴言</option>
+        <option value="傳道書">傳道書</option>
+        <option value="雅歌">雅歌</option>
+        <option value="以賽亞書">以賽亞書</option>
+        <option value="耶利米書">耶利米書</option>
+        <option value="耶利米哀歌">耶利米哀歌</option>
+        <option value="以西結書">以西結書</option>
+        <option value="但以理書">但以理書</option>
+        <option value="何西阿書">何西阿書</option>
+        <option value="約珥書">約珥書</option>
+        <option value="阿摩司書">阿摩司書</option>
+        <option value="俄巴底亞書">俄巴底亞書</option>
+        <option value="約拿書">約拿書</option>
+        <option value="彌迦書">彌迦書</option>
+        <option value="那鴻書">那鴻書</option>
+        <option value="哈巴谷書">哈巴谷書</option>
+        <option value="西番雅書">西番雅書</option>
+        <option value="哈該書">哈該書</option>
+        <option value="撒迦利亞書">撒迦利亞書</option>
+        <option value="瑪拉基書">瑪拉基書</option>
+
+        <!-- New Testament -->
+        <option value="馬太福音">馬太福音</option>
+        <option value="馬可福音">馬可福音</option>
+        <option value="路加福音">路加福音</option>
+        <option value="約翰福音">約翰福音</option>
+        <option value="使徒行傳">使徒行傳</option>
+        <option value="羅馬書">羅馬書</option>
+        <option value="哥林多前書">哥林多前書</option>
+        <option value="哥林多後書">哥林多後書</option>
+        <option value="加拉太書">加拉太書</option>
+        <option value="以弗所書">以弗所書</option>
+        <option value="腓立比書">腓立比書</option>
+        <option value="歌羅西書">歌羅西書</option>
+        <option value="帖撒羅尼迦前書">帖撒羅尼迦前書</option>
+        <option value="帖撒羅尼迦後書">帖撒羅尼迦後書</option>
+        <option value="提摩太前書">提摩太前書</option>
+        <option value="提摩太後書">提摩太後書</option>
+        <option value="提多書">提多書</option>
+        <option value="腓利門書">腓利門書</option>
+        <option value="希伯來書">希伯來書</option>
+        <option value="雅各書">雅各書</option>
+        <option value="彼得前書">彼得前書</option>
+        <option value="彼得後書">彼得後書</option>
+        <option value="約翰一書">約翰一書</option>
+        <option value="約翰二書">約翰二書</option>
+        <option value="約翰三書">約翰三書</option>
+        <option value="猶大書">猶大書</option>
+        <option value="啟示錄">啟示錄</option>
+    </select>
+
+    <!-- From Chapter Dropdown -->
+    <label for="from-chapter">From Chapter:</label>
+    <select id="from-chapter" name="from-chapter" onchange="updateFromVerses(); updateToChapter();">
+            <option value="">--Please Select Chapter--</option>
+        </select>
+
+    <!-- From Verse Dropdown with indentation -->
+    <div class="form-group indented">
+      <label for="from-verse">From Verse:</label>
+      <select id="from-verse" name="from-verse">
+         <option value="">--Please Select Verse--</option>
+      </select>
+    </div>
+
+    <!-- To Chapter Dropdown -->
+    <label for="to-chapter">To Chapter:</label>
+    <select id="to-chapter" name="to-chapter" onchange="updateToVerses()">
+        <option value="">--Please Select Chapter--</option>
+      </select>
+
+    <!-- To Verse Dropdown with indentation -->
+    <div class="form-group indented">
+      <label for="to-verse">To Verse:</label>
+      <select id="to-verse" name="to-verse">
+        <option value="">--Please Select Verse--</option>
+     </select>
+    </div>
+
+    <!-- Submit Button -->
+    <button onclick="submitSelection()">Submit</button>
+    <section id="result-message" role="alert" style="display: none; font-size: 1em; text-align: center;"></section>
+  </div>
+
+  <script>
+    // Define an object where each book has an array of chapters with the number of verses in each chapter
+    const bibleBooks = {
+    // Old Testament
+    '創世記': [31, 25, 24, 26, 32, 22, 24, 22, 29, 32, 32, 20, 18, 24, 21, 16, 27, 33, 38, 18, 34, 24, 20, 67, 34, 35, 46, 22, 35, 43, 55, 32, 20, 31, 29, 43, 36, 30, 23, 23, 57, 38, 34, 34, 28, 34, 31, 22, 33, 26],
+    '出埃及記': [22, 25, 22, 31, 23, 30, 25, 32, 35, 29, 10, 51, 22, 31, 27, 36, 16, 27, 25, 26, 36, 31, 33, 18, 40, 37, 21, 43, 46, 38, 18, 35, 23, 35, 35, 38, 29, 31, 43, 38],
+    '利未記': [17, 16, 17, 35, 19, 30, 38, 36, 24, 20, 47, 8, 59, 57, 33, 34, 16, 30, 37, 27, 24, 33, 44, 23, 55, 46, 34],
+    '民數記': [54, 34, 51, 49, 31, 27, 89, 26, 23, 36, 35, 16, 33, 45, 41, 50, 13, 32, 22, 29, 35, 41, 30, 25, 18, 65, 23, 31, 40, 16, 54, 42, 56, 29, 34, 13],
+    '申命記': [46, 37, 29, 49, 33, 25, 26, 20, 29, 22, 32, 32, 18, 29, 23, 22, 20, 22, 21, 20, 23, 30, 25, 22, 19, 19, 26, 68, 29, 20, 30, 52, 29, 12],
+    '約書亞記': [18, 24, 17, 24, 15, 27, 26, 35, 27, 43, 23, 24, 33, 15, 63, 10, 18, 28, 51, 9, 45, 34, 16, 33],
+    '士師記': [36, 23, 31, 24, 31, 40, 25, 35, 57, 18, 40, 15, 25, 20, 20, 31, 13, 31, 30, 48, 25],
+    '路得記': [22, 23, 18, 22],
+    '撒母耳記上': [28, 36, 21, 22, 12, 21, 17, 22, 27, 27, 15, 25, 23, 52, 35, 23, 58, 30, 24, 42, 15, 23, 29, 22, 44, 25, 12, 25, 11, 31, 13],
+    '撒母耳記下': [27, 32, 39, 12, 25, 23, 29, 18, 13, 19, 27, 31, 39, 33, 37, 23, 29, 33, 43, 26, 22, 51, 39, 25],
+    '列王紀上': [53, 46, 28, 34, 18, 38, 51, 66, 28, 29, 43, 33, 34, 31, 34, 34, 24, 46, 21, 43, 29, 53],
+    '列王紀下': [18, 25, 27, 44, 27, 33, 20, 29, 37, 36, 21, 21, 25, 29, 38, 20, 41, 37, 37, 21, 26, 20, 37, 20, 30],
+    '歷代志上': [54, 55, 24, 43, 26, 81, 40, 40, 44, 14, 47, 40, 14, 17, 29, 43, 27, 17, 19, 8, 30, 19, 32, 31, 31, 32, 34, 21, 30],
+    '歷代志下': [17, 18, 17, 22, 14, 42, 22, 18, 31, 19, 23, 16, 22, 15, 19, 14, 19, 34, 11, 37, 20, 12, 21, 27, 28, 23, 9, 27, 36, 27, 21, 33, 25, 33, 27, 23],
+    '以斯拉記': [11, 70, 13, 24, 17, 22, 28, 36, 15, 44],
+    '尼希米記': [11, 20, 32, 23, 19, 19, 73, 18, 38, 39, 36, 47, 31],
+    '以斯帖記': [22, 23, 15, 17, 14, 14, 10, 17, 32, 3],
+    '約伯記': [22, 13, 26, 21, 27, 30, 21, 22, 35, 22, 20, 25, 28, 22, 35, 22, 16, 21, 29, 29, 34, 30, 17, 25, 6, 14, 23, 28, 25, 31, 40, 22, 33, 37, 16, 33, 24, 41, 30, 24, 34, 17],
+    '詩篇': [
+    6,    // Psalm 1
+    12,   // Psalm 2
+    8,    // Psalm 3
+    8,    // Psalm 4
+    12,   // Psalm 5
+    10,   // Psalm 6
+    17,   // Psalm 7
+    9,    // Psalm 8
+    20,   // Psalm 9
+    18,   // Psalm 10
+    7,    // Psalm 11
+    10,   // Psalm 12
+    6,    // Psalm 13
+    7,    // Psalm 14
+    9,    // Psalm 15
+    11,   // Psalm 16
+    15,   // Psalm 17
+    50,   // Psalm 18
+    14,   // Psalm 19
+    9,    // Psalm 20
+    13,   // Psalm 21
+    31,   // Psalm 22
+    6,    // Psalm 23
+    10,   // Psalm 24
+    22,   // Psalm 25
+    12,   // Psalm 26
+    14,   // Psalm 27
+    9,    // Psalm 28
+    11,   // Psalm 29
+    12,   // Psalm 30
+    24,   // Psalm 31
+    11,   // Psalm 32
+    22,   // Psalm 33
+    22,   // Psalm 34
+    28,   // Psalm 35
+    12,   // Psalm 36
+    40,   // Psalm 37
+    22,   // Psalm 38
+    13,   // Psalm 39
+    17,   // Psalm 40
+    13,   // Psalm 41
+    11,   // Psalm 42
+    5,    // Psalm 43
+    26,   // Psalm 44
+    17,   // Psalm 45
+    11,   // Psalm 46
+    9,    // Psalm 47
+    14,   // Psalm 48
+    20,   // Psalm 49
+    23,   // Psalm 50
+    19,   // Psalm 51
+    9,    // Psalm 52
+    6,    // Psalm 53
+    7,    // Psalm 54
+    23,   // Psalm 55
+    13,   // Psalm 56
+    11,   // Psalm 57
+    11,   // Psalm 58
+    17,   // Psalm 59
+    12,   // Psalm 60
+    8,    // Psalm 61
+    12,   // Psalm 62
+    11,   // Psalm 63
+    10,   // Psalm 64
+    13,   // Psalm 65
+    20,   // Psalm 66
+    7,    // Psalm 67
+    35,   // Psalm 68
+    36,   // Psalm 69
+    5,    // Psalm 70
+    24,   // Psalm 71
+    20,   // Psalm 72
+    28,   // Psalm 73
+    23,   // Psalm 74
+    10,   // Psalm 75
+    12,   // Psalm 76
+    20,   // Psalm 77
+    72,   // Psalm 78
+    13,   // Psalm 79
+    19,   // Psalm 80
+    16,   // Psalm 81
+    8,    // Psalm 82
+    18,   // Psalm 83
+    12,   // Psalm 84
+    13,   // Psalm 85
+    17,   // Psalm 86
+    7,    // Psalm 87
+    18,   // Psalm 88
+    52,   // Psalm 89
+    17,   // Psalm 90
+    16,   // Psalm 91
+    15,   // Psalm 92
+    5,    // Psalm 93
+    23,   // Psalm 94
+    11,   // Psalm 95
+    13,   // Psalm 96
+    12,   // Psalm 97
+    9,    // Psalm 98
+    9,    // Psalm 99
+    5,    // Psalm 100
+    8,    // Psalm 101
+    28,   // Psalm 102
+    22,   // Psalm 103
+    35,   // Psalm 104
+    45,   // Psalm 105
+    48,   // Psalm 106
+    43,   // Psalm 107
+    13,   // Psalm 108
+    31,   // Psalm 109
+    7,    // Psalm 110
+    10,   // Psalm 111
+    10,   // Psalm 112
+    9,    // Psalm 113
+    8,    // Psalm 114
+    18,   // Psalm 115
+    19,   // Psalm 116
+    2,    // Psalm 117
+    29,   // Psalm 118
+    176,  // Psalm 119
+    8,    // Psalm 120
+    8,    // Psalm 121
+    9,    // Psalm 122
+    4,    // Psalm 123
+    8,    // Psalm 124
+    5,    // Psalm 125
+    6,    // Psalm 126
+    5,    // Psalm 127
+    6,    // Psalm 128
+    8,    // Psalm 129
+    8,    // Psalm 130
+    3,    // Psalm 131
+    18,   // Psalm 132
+    3,    // Psalm 133
+    3,    // Psalm 134
+    21,   // Psalm 135
+    26,   // Psalm 136
+    9,    // Psalm 137
+    8,    // Psalm 138
+    24,   // Psalm 139
+    13,   // Psalm 140
+    10,   // Psalm 141
+    7,    // Psalm 142
+    12,   // Psalm 143
+    15,   // Psalm 144
+    21,   // Psalm 145
+    10,   // Psalm 146
+    20,   // Psalm 147
+    14,   // Psalm 148
+    9,    // Psalm 149
+    6     // Psalm 150
+    ],
+    '箴言': [33, 22, 35, 27, 23, 35, 27, 36, 18, 32, 31, 28, 25, 35, 33, 33, 28, 24, 29, 30, 31, 29, 35, 34, 28, 28, 27, 28, 27, 33, 31],
+    '傳道書': [18, 26, 22, 16, 20, 12, 29, 17, 18, 20, 10, 14],
+    '雅歌': [17, 17, 11, 16, 16, 13, 13, 14],
+    '以賽亞書': [31, 22, 26, 6, 30, 13, 25, 22, 21, 34, 16, 6, 22, 32, 9, 14, 14, 7, 25, 6, 17, 25, 18, 23, 12, 21, 13, 29, 24, 33, 9, 20, 24, 17, 10, 22, 38, 22, 8, 31, 29, 25, 28, 28, 25, 13, 15, 22, 26, 11, 23, 15, 12, 17, 13, 12, 21, 14, 21, 22, 11, 12, 19, 11, 25, 24, 13, 11, 12, 19],
+    '耶利米書': [19, 37, 25, 31, 31, 30, 34, 22, 26, 25, 23, 17, 27, 22, 21, 21, 27, 23, 15, 18, 14, 30, 40, 10, 38, 24, 22, 17, 32, 24, 40, 44, 26, 22, 19, 32, 21, 28, 18, 16, 18, 22, 13, 30, 5, 28, 7, 47, 39, 46, 64, 34],
+    '耶利米哀歌': [22, 22, 66, 22, 22],
+    '以西結書': [28, 10, 27, 17, 17, 14, 27, 18, 11, 22, 25, 28, 23, 23, 8, 63, 24, 32, 14, 49, 32, 31, 49, 27, 17, 21, 36, 26, 21, 26, 18, 32, 33, 31, 15, 38, 28, 23, 29, 49, 26, 20, 27, 31, 25, 24, 23, 35],
+    '但以理書': [21, 49, 100, 37, 32, 32, 28, 27, 27, 21, 45, 13],
+    '何西阿書': [11, 23, 5, 19, 15, 11, 16, 14, 17, 15, 12, 14, 16, 9],
+    '約珥書': [20, 32, 21],
+    '阿摩司書': [15, 16, 15, 13, 27, 14, 17, 14, 15],
+    '俄巴底亞書': [21],
+    '約拿書': [16, 11, 10, 11],
+    '彌迦書': [16, 13, 12, 13, 15, 16, 20],
+    '那鴻書': [15, 13, 19],
+    '哈巴谷書': [17, 20, 19],
+    '西番雅書': [18, 15, 20],
+    '哈該書': [15, 23],
+    '撒迦利亞書': [21, 13, 10, 14, 11, 15, 14, 23, 17, 12, 17, 14, 9, 21],
+    '瑪拉基書': [14, 17, 18, 6],
+
+    // New Testament
+    '馬太福音': [25, 23, 17, 25, 48, 34, 29, 34, 38, 42, 30, 50, 58, 36, 39, 28, 27, 35, 30, 34, 46, 46, 39, 51, 46, 75, 66, 20],
+    '馬可福音': [45, 28, 35, 41, 43, 56, 37, 38, 50, 52, 33, 44, 37, 72, 47, 20],
+    '路加福音': [80, 52, 38, 44, 39, 49, 50, 56, 62, 42, 54, 59, 35, 35, 32, 31, 37, 43, 48, 47, 38, 71, 56, 53],
+    '約翰福音': [51, 25, 36, 54, 47, 71, 53, 59, 41, 42, 57, 50, 38, 31, 27, 33, 26, 40, 42, 31, 25],
+    '使徒行傳': [26, 47, 26, 37, 42, 15, 60, 40, 43, 48, 30, 25, 52, 28, 41, 40, 34, 28, 41, 38, 40, 30, 35, 27, 27, 32, 44, 31],
+    '羅馬書': [32, 29, 31, 25, 21, 23, 25, 39, 33, 21, 36, 21, 14, 23, 33, 27],
+    '哥林多前書': [31, 16, 23, 21, 13, 20, 40, 13, 27, 33, 34, 31, 13, 40, 58, 24],
+    '哥林多後書': [24, 17, 18, 18, 21, 18, 16, 24, 15, 18, 33, 21, 14],
+    '加拉太書': [24, 21, 29, 31, 26, 18],
+    '以弗所書': [23, 22, 21, 32, 33, 24],
+    '腓立比書': [30, 30, 21, 23],
+    '歌羅西書': [29, 23, 25, 18],
+    '帖撒羅尼迦前書': [10, 20, 13, 18, 28],
+    '帖撒羅尼迦後書': [12, 17, 18],
+    '提摩太前書': [20, 15, 16, 16, 25, 21],
+    '提摩太後書': [18, 26, 17, 22],
+    '提多書': [16, 15, 15],
+    '腓利門書': [25],
+    '希伯來書': [14, 18, 19, 16, 14, 20, 28, 13, 27, 39, 40, 29, 25],
+    '雅各書': [27, 26, 18, 17, 20],
+    '彼得前書': [25, 25, 22, 19, 14],
+    '彼得後書': [21, 22, 18],
+    '約翰一書': [10, 29, 24, 21, 21],
+    '約翰二書': [13],
+    '約翰三書': [15],
+    '猶大書': [25],
+    '啟示錄': [20, 29, 22, 11, 14, 17, 17, 13, 21, 11, 19, 18, 18, 20, 8, 21, 18, 24, 21, 15, 27, 21]
+    };
+
+        function updateChapters() {
+            const bookSelect = document.getElementById('bible-book');
+            const fromChapterSelect = document.getElementById('from-chapter');
+            const toChapterSelect = document.getElementById('to-chapter');
+            const book = bookSelect.value;
+
+            // Clear previous chapters
+            fromChapterSelect.innerHTML = '<option value="">--Please Select Chapter--</option>';
+            toChapterSelect.innerHTML = '<option value="">--Please Select Chapter--</option>';
+            document.getElementById('from-verse').innerHTML = '<option value="">--Please Select Verse--</option>';
+            document.getElementById('to-verse').innerHTML = '<option value="">--Please Select Verse--</option>';
+
+            if (book && bibleBooks[book]) {
+                const chapters = bibleBooks[book];
+                for (let i = 1; i <= chapters.length; i++) {
+                    fromChapterSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                    toChapterSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                }
+            }
+        }
+
+        function updateFromVerses() {
+            const bookSelect = document.getElementById('bible-book');
+            const fromChapterSelect = document.getElementById('from-chapter');
+            const fromVerseSelect = document.getElementById('from-verse');
+            const book = bookSelect.value;
+            const chapter = fromChapterSelect.value;
+
+            fromVerseSelect.innerHTML = '<option value="">--Please Select Verse--</option>';
+
+            if (book && chapter && bibleBooks[book]) {
+                const verses = bibleBooks[book][chapter - 1]; // chapter is 1-based
+                for (let i = 1; i <= verses; i++) {
+                    fromVerseSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                }
+            }
+        }
+
+        function updateToChapter() {
+            const fromChapterSelect = document.getElementById('from-chapter');
+            const toChapterSelect = document.getElementById('to-chapter');
+
+            // Set to chapter to be the same as from chapter
+            toChapterSelect.value = fromChapterSelect.value;
+            updateToVerses(); // Update the to verse dropdown based on the selected to chapter
+        }
+
+        function updateToVerses() {
+            const bookSelect = document.getElementById('bible-book');
+            const toChapterSelect = document.getElementById('to-chapter');
+            const toVerseSelect = document.getElementById('to-verse');
+            const book = bookSelect.value;
+            const chapter = toChapterSelect.value;
+
+            toVerseSelect.innerHTML = '<option value="">--Please Select Verse--</option>';
+
+            if (book && chapter && bibleBooks[book]) {
+                const verses = bibleBooks[book][chapter - 1]; // chapter is 1-based
+                for (let i = 1; i <= verses; i++) {
+                    toVerseSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                }
+            }
+        }
+
+        function submitSelection() {
+          const book = document.getElementById('bible-book').value;
+          const fromChapter = parseInt(document.getElementById('from-chapter').value);
+          const fromVerse = parseInt(document.getElementById('from-verse').value);
+          const toChapter = parseInt(document.getElementById('to-chapter').value);
+          const toVerse = parseInt(document.getElementById('to-verse').value);
+          const resultMessage = document.getElementById('result-message');
+
+          // Clear previous messages
+          resultMessage.innerText = "";
+          resultMessage.style.display = "none";
+
+          if (book && fromChapter && fromVerse && toChapter && toVerse) {
+            //if (fromChapter > toChapter || (fromChapter === toChapter && fromVerse > toVerse)) {
+            if (fromChapter > toChapter) {
+              alert("Invalid range: 'To Chapter' is smaller than the 'From Chapter'");
+            } else if (fromChapter === toChapter && fromVerse > toVerse) {
+              alert("Invalid range: 'To Verse' is smaller than the 'From Verse' and the 'To Chapter' == 'From Chapter'");
+            } else if (fromChapter <= 0 || fromVerse <= 0 || toChapter <= 0 || toVerse <= 0) {
+              alert('Chapters and verses must be positive integers.');
+            } else {
+              alert(`You selected: ${book} ${fromChapter}:${fromVerse} to ${book} ${toChapter}:${toVerse}`);
+              const p = {
+                  book: book,
+                  from_chapter: fromChapter,
+                  from_verse: fromVerse,
+                  to_chapter: toChapter,
+                  to_verse: toVerse
+              };
+
+              // Call the server-side function using google.script.run
+              google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure) // Add a failure handler
+                .run_createPassagePPT(p);
+
+              resultMessage.innerHTML = '<div class="loading-spinner"></div> Start Bible Passage Processing...Please Wait...';
+              resultMessage.style.color = "yellow"; // Bright and visible
+              resultMessage.style.fontWeight = "bold"; // Make the text bold
+              resultMessage.style.textShadow = "1px 1px 2px black"; // Add a shadow for extra clarity
+              resultMessage.style.display = "block";    
+            }
+          } else {
+            alert('Please select all Bible chapters and verses');
+            }
+        }     
+
+
+        function onSuccess(response) {
+          // Display the server response in an alert
+          const resultMessage = document.getElementById('result-message');
+          resultMessage.innerHTML = "Bible Passage processed successfully!"; // Clears the spinner and shows the message
+          resultMessage.style.color = "green";
+          resultMessage.style.display = "block";
+          alert(`Server Response: ${response}`);
+        }
+
+        function onFailure(error) {
+          const resultMessage = document.getElementById('result-message');
+          resultMessage.innerHTML = "An error occurred while processsing the bible passage. Please try again."; // Clears the spinner and shows the message
+          resultMessage.style.color = "red";
+          resultMessage.style.color = "red";
+          resultMessage.style.display = "block";
+          console.error("Failed to execute run_createPassagePPT:", error);
+          // Optionally, display an alert or error message in the UI
+          alert("There was an error: " + error.message);
+        }
+
+  </script>
+
+</body>
+
+</html>
