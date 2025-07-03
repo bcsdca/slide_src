@@ -1,5 +1,4 @@
 // version 8 fixing the weekend of the month problem for the comining week (11/25/2022)
-// version 9 using find_title_slide without specifying position(12/5/2022)
 // version 10 removing passage_dstId, just created a new one each time, and dont needed to clean the old one
 // just duplicate over the passage_srcid
 
@@ -16,10 +15,6 @@ function createPassageSlide(passage) {
 
   //clearLogSheet();
 
-  const passage_srcid = "1mPDpbvcSzDRXZ_GY7RW-28NjOrMEiuWw3LMMZuzu7WU";
-  //const passage_srcid = "1uhYK9SpzZv2-PB-kOOSpq6q0TH_lod9u8PJsXpnO4vI";
-  //passage_dstId file is duplicate of passage_srcid file without the "_template" in the name
-  //thus avoiding the slide_remove_copy and file_duplicate routines at the end
   var passage_dstId = fileDuplicate(passage_srcid, passage);
 
   // Fetch the active user's email
@@ -62,7 +57,6 @@ function createPassageSlide(passage) {
 
 
   // Working on the scripture reading slides
-  //scripture_masterSlide = find_title_slide(passage_dstId, "TITLE_SCRIPTURE_READING");
   const deck = SlidesApp.openById(passage_dstId);
   scripture_masterSlide = findTitleSlide(deck, "TITLE_SCRIPTURE_READING");
 

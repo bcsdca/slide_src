@@ -22,13 +22,23 @@ function parsePassage(passage) {
 
       // Remove everything in parentheses
       verseNumberTemp = verseNumberTemp.replace(/\(.*?\)/g, '');
-
+     
       // Remove all non-digit at the end of verseNumberTemp
       var lastDigitPosition = extractLastDigitPosition(verseNumberTemp);
 
+      // Get the last character and convert to lowercase
+      var verseNumberTempLastChar = verseNumberTemp.slice(-1).toLowerCase();
+
       if (lastDigitPosition !== -1) {
-        var verseNumber = verseNumberTemp.substring(0, lastDigitPosition + 1);
-        logMessage(`${getCallStackTrace()}: The verse number : ${verseNumber}`);
+        if (verseNumberTempLastChar === "a" || verseNumberTempLastChar === "b") {
+          logMessage(getCallStackTrace() + " : Last character of the verseNumber is 'a' or 'b'");
+          //getting the verse number including "a" or "b" at the end
+          var verseNumber = verseNumberTemp.substring(0, lastDigitPosition + 2);
+        } else {
+          logMessage(getCallStackTrace() + " : Last character of the verseNumber is NOT 'a' or 'b'");
+          var verseNumber = verseNumberTemp.substring(0, lastDigitPosition + 1);
+        }
+        logMessage(`${getCallStackTrace()}: The verseNumber : ${verseNumber}`);
       } else {
         logMessageError(`${getCallStackTrace()}: Error: This should never happen, there is no digit on the verse number: ${verseNumber}`);
         return;
@@ -42,7 +52,7 @@ function parsePassage(passage) {
         bookName = bookNameSave;
         logMessage(`${getCallStackTrace()}: The passage${i + 1} book name is empty, using the 1st book name \"${bookName}\"`);
       }
-     
+
       logMessage(`${getCallStackTrace()}: The book name: ${bookName}`);
       logMessage(`${getCallStackTrace()}: The chapter number: ${chapterNumber}`);
       logMessage(`${getCallStackTrace()}: The verse number: ${verseNumber}`);

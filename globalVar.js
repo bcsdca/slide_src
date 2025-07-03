@@ -15,3 +15,12 @@ const maxLinePerSlide = 7; //max # of line per sldie for calibri 50 fonts, mainl
 
 var logBuffer = []; //used by logMessage, logMessageError, flushLogSheet
 
+//used by createFellowshipSlide
+const fellowshipSrcId = "1lyFUIehcL3SdlagvWfXulTYu7FEZ5nN7hNYA5Yq1T0w"; 
+
+//used by createPassageSlide
+const passage_srcid = "1mPDpbvcSzDRXZ_GY7RW-28NjOrMEiuWw3LMMZuzu7WU";
+
+//used by createWorshipSlide
+const worshipSrcId = "1DtopxwBKXJL-TwCIjYsB6EsgcYi6ULKh7oMIfZjp7kE"; //2025
+

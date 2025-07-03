@@ -2,7 +2,6 @@ function createFellowshipSlide() {
 
   clearLogSheet();
   SpreadsheetApp.getActive().toast("Start creating the fellowship slides... Please wait.", "Processing...", -1); // Show a persistent toast
-  const fellowshipSrcId = "1lyFUIehcL3SdlagvWfXulTYu7FEZ5nN7hNYA5Yq1T0w"; //fellowship_template_2024
   const fellowshipDstId = fileDuplicate(fellowshipSrcId); // Duplicate source deck
   const deck = SlidesApp.openById(fellowshipDstId);
 

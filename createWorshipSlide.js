@@ -4,8 +4,6 @@ function createWorshipSlide() {
 
   clearLogSheet();
 
-  //const worshipSrcId = "1SuxacAM6IXlKEAp1apXnLjQ1ZVn__cy_c8mw_vwA_4Q"; //2024
-  const worshipSrcId = "1DtopxwBKXJL-TwCIjYsB6EsgcYi6ULKh7oMIfZjp7kE"; //2025
   const worshipDstId = fileDuplicate(worshipSrcId);
 
   const sheet = SpreadsheetApp.getActive().getSheetByName("worship");

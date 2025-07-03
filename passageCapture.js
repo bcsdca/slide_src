@@ -32,9 +32,9 @@ function passageCapture(p) {
 
   var book = first;
   var array_my_passage2 = remainder.split(":");
-  
+
   var chapter = array_my_passage2[0].replace(/\d*\D+/, "");
-  
+
   if (array_my_passage2[1] != undefined) {
     var array_verses = breakDownVerses(array_my_passage2[1]);
   }
@@ -49,17 +49,37 @@ function passageCapture(p) {
 
   logMessage(`${getCallStackTrace()}: Reading from the book = ${book}, chapter = ${chapter}, array_verses = ${JSON.stringify(array_verses)}`)
 
-  for (let i = 0; (i < array_verses.length); i++) {
-    var one_verse_return = bibleGatewaySingleVerseCapture(book, chapter, array_verses[i])
-    if (one_verse_return != undefined) {
-      logMessage(`${getCallStackTrace()}: one verse return = ${one_verse_return}, verse length = ${one_verse_return.length}, book = ${book}, chapter = ${chapter}, verse = ${array_verses[i]}`)
-      array_out_passage.push(one_verse_return);
-    } else {
-      //exception, return whatever we have because we just started to run out of stuff to return
-      logMessageError(`${getCallStackTrace()}: NO verse return!!! one verse return = ${one_verse_return}, for book = ${book}, chapter = ${chapter}, verse = ${array_verses[i]}`);
-     
-    }
+  for (let i = 0; i < array_verses.length; i++) {
+    const verse = array_verses[i];
+    const verseStr = verse.toString().toLowerCase();
+    let one_verse_return = bibleGatewaySingleVerseCapture(book, chapter, verse);
 
+    if (one_verse_return !== undefined) {
+      if (verseStr.includes("a") || verseStr.includes("b")) {
+        // Match: part1 (with optional trailing punctuation), part2 (rest)
+        const match = one_verse_return.match(/^(.+?[,.;:!?。，])(.*)$/); //lazy match, 1st occurence of the punctuation mark
+        //const match = one_verse_return.match(/^([^,.;:!?。，]+[,.!?;:，。]?)(.*)$/);
+
+        if (match) {
+          if (verseStr.includes("a")) {
+            one_verse_return = match[1].trim();  // First part + punctuation
+            logMessage(`${getCallStackTrace()}: one verse return (1st part) = ${one_verse_return}, book = ${book}, chapter = ${chapter}, verse = ${verse}`);
+          } else if (verseStr.includes("b")) {
+            one_verse_return = match[2].trim();  // Second part
+            logMessage(`${getCallStackTrace()}: one verse return (2nd part) = ${one_verse_return}, book = ${book}, chapter = ${chapter}, verse = ${verse}`);
+          }
+        } else {
+          // Fallback if no punctuation match — use full string
+          one_verse_return = one_verse_return.trim();
+        }
+      }
+
+      logMessage(`${getCallStackTrace()}: one verse return = ${one_verse_return}, book = ${book}, chapter = ${chapter}, verse = ${verse}`);
+      array_out_passage.push(one_verse_return);
+
+    } else {
+      logMessageError(`${getCallStackTrace()}: NO verse return!!! one verse return = ${one_verse_return}, for book = ${book}, chapter = ${chapter}, verse = ${verse}`);
+    }
   }
 
   logMessage(`${getCallStackTrace()}: Returning array_out_passage = ${array_out_passage}`)

@@ -7,10 +7,10 @@ function onOpen(e) {
   // Add a custom menu to the spreadsheet.
   SpreadsheetApp.getUi() // Or DocumentApp, SlidesApp, or FormApp.
     .createMenu('💥 CEC Slide Automation 💥')
-    .addItem('Generate Fellowship Slides', 'createFellowshipSlide')
-    .addItem('Generate Coming Sunday\'s Worship Slides', 'createWorshipSlide')
-    .addItem('Generate Bible Passage Google Slide ONLY', 'createPassagePPTSidebar')
-    .addItem('Populate "worship" tab of the slide_src with this week\'s worship info from 2 gmails', 'populateWorshipTab')
+    .addItem('A. Generate Fellowship Slides', 'createFellowshipSlide')
+    .addItem('B. Generate Coming Sunday\'s Worship Slides', 'createWorshipSlide')
+    .addItem('C. Generate Bible Passage Google Slide ONLY', 'createPassagePPTSidebar')
+    .addItem('D. Populate "worship" tab of the slide_src with this week\'s worship info from 2 gmails', 'populateWorshipTab')
     .addToUi();
 }
 

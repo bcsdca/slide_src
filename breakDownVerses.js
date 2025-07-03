@@ -1,29 +1,67 @@
-function breakDownVerses(v) {
-  //var v = "1,3,5-7,10";
-  //var v = "1,3";
-  //var v = "3-10";
-  //var v = "10b,11-13"
+function breakDownVerses(input) {
+  logMessage(`${getCallStackTrace()}: Input = ${input}`);
+  if (typeof input !== 'string') return [];
 
-  //a1 is all the individual verse separated by "," or "，"
-  //var a1 = v.split(",");
-  var a1 = v.split(/，|,/);
-  
-  var array_verses = [];
-  for (var j = 0; (j < a1.length); j++) {
-    //a2 is all the verses join by "-"
-    var a2 = a1[j].split("-")
-    //a2 just a single verse
-    if (a2.length == 1) {
-      //array_verses.push(Number(a1[j]))
-      //verse maybe 10b, can't use Number
-      array_verses.push((a1[j]))
-    } else {
-      //a2 has "from" and "to" verse (5-7)
-      for (var i = Number(a2[0]); (i <= Number(a2[1])); i++) {
-        array_verses.push(i)
+  const parts = input.split(/[,，]/).map(p => p.trim());
+  const result = [];
+
+  for (const part of parts) {
+    const range = part.split('-').map(p => p.trim());
+
+    if (range.length === 1) {
+      const val = range[0];
+      if (/^\d+$/.test(val)) {
+        result.push(Number(val));
+      } else {
+        result.push(val);
       }
+    } else if (range.length === 2) {
+      const [startStr, endStr] = range;
+
+      const startNum = parseInt(startStr, 10);
+      const endNum = parseInt(endStr, 10);
+
+      // If start or end is invalid, skip
+      if (isNaN(startNum) || isNaN(endNum)) {
+        console.warn(`Invalid range: ${part}`);
+        continue;
+      }
+
+      // Determine if start or end has letters
+      const startIsAlpha = /[a-zA-Z]/.test(startStr);
+      const endIsAlpha = /[a-zA-Z]/.test(endStr);
+
+      if (startIsAlpha && endIsAlpha) {
+        // Case: "1b-2a"
+        result.push(startStr); // e.g., "1b"
+        for (let i = startNum + 1; i < endNum; i++) {
+          result.push(i);
+        }
+        result.push(endStr); // e.g., "2a"
+      } else if (startIsAlpha && !endIsAlpha) {
+        // Case: "1b-6"
+        result.push(startStr); // e.g., "1b"
+        for (let i = startNum + 1; i <= endNum; i++) {
+          result.push(i);
+        }
+      } else if (!startIsAlpha && endIsAlpha) {
+        // Case: "8-10a"
+        for (let i = startNum; i < endNum; i++) {
+          result.push(i);
+        }
+        result.push(endStr); // e.g., "10a"
+      } else {
+        // Normal numeric range (e.g. "3-5")
+        const [from, to] = startNum <= endNum ? [startNum, endNum] : [endNum, startNum];
+        for (let i = from; i <= to; i++) {
+          result.push(i);
+        }
+      }
+    } else {
+      logMessageError(`Invalid format: ${part}`);
     }
   }
-  logMessage(`${getCallStackTrace()} : array_verses =  ${JSON.stringify(array_verses)}`)
-  return array_verses
+
+  logMessage(`${getCallStackTrace()}: Verses Array = ${JSON.stringify(result)}`);
+  return result;
 }
