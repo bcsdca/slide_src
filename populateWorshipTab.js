@@ -157,7 +157,7 @@ function populateWorshipTab(isTesting = false) {
   var annoArray = processWorshipEmail(msg, srRowToInsert);
 
   // Process Announcements
-  processAnnouncements(attachment, annoArray);
+  processAnnouncementsDeepSeekAPI(attachment, annoArray);
 
   // Final Spreadsheet Update
   sheetContents = sheet.getDataRange().getValues();
@@ -281,32 +281,29 @@ function parseAnnouncements(text) {
   return announcements;
 }
 
-function saveAnnouncementsToSS(announcementMessages, annoArray) {
+function saveAnnouncementsToSS(announcementMessages) {
   var sheet = SpreadsheetApp.getActive().getSheetByName("worship");
   var sheetContents = sheet.getDataRange().getValues();
 
   var announcementRowIndex = findRowIndex(sheetContents, /TITLE_ANNOUNCEMENT/);
   if (announcementRowIndex === -1) {
-    logMessageError(getCallStackTrace() + `TITLE_ANNOUNCEMENT not found in the sheet.`);
+    logMessageError(`${getCallStackTrace()}: TITLE_ANNOUNCEMENT not found in the sheet.`);
     return;
   }
 
-  logMessage(getCallStackTrace() + `Found TITLE_ANNOUNCEMENT at row: ${announcementRowIndex + 1}`);
+  logMessage(`${getCallStackTrace()}: Found TITLE_ANNOUNCEMENT at row: ${announcementRowIndex + 1}`);
   var currentRow = announcementRowIndex + 1;
 
-  for (var i = 0; i < annoArray.length; i++) {
-    logMessage(getCallStackTrace() + `: Working on this announcement # ${annoArray[i]}: ${JSON.stringify(announcementMessages[annoArray[i]])}`);
-    if (announcementMessages[annoArray[i]]) {
-      var parsedAnnouncement = parseAnnouncementMessage(announcementMessages[annoArray[i]]);
-      logMessage(getCallStackTrace() + `: Parsed announcement : ${JSON.stringify(parsedAnnouncement)}`);
+  for (var i = 0; i < announcementMessages.length; i++) {
+    //since announcementMessages array start with index 0, so 1st element is pointing to 1st announcement to work on
+    logMessage(`${getCallStackTrace()}: Working on this announcement = ${JSON.stringify(announcementMessages[i])}`);
 
-      // Save each part of the announcement to the spreadsheet
-      saveAnnouncementToSS(sheet, currentRow, parsedAnnouncement);
-      currentRow += parsedAnnouncement.pages.length;
+    var parsedAnnouncement = parseAnnouncementMessage(announcementMessages[i]);
+    logMessage(`${getCallStackTrace()}: Parsed announcement : ${JSON.stringify(parsedAnnouncement)}`);
 
-    } else {
-      logMessage(getCallStackTrace() + `: Unfortunately, this announcement # ${annoArray[i]} is not found in the announcement pdf file`);
-    }
+    // Save each part of the announcement to the spreadsheet
+    saveAnnouncementToSS(sheet, currentRow, parsedAnnouncement);
+    currentRow += parsedAnnouncement.pages.length;
 
   }
 }
@@ -318,7 +315,10 @@ function parseAnnouncementMessage(message) {
   let body = bodyParts.join("").trim();
 
   // Split body into pages based on a maximum character limit
-  let pages = splitByPeriodEtc(body, max_c_per_anno_page);
+  //let pages = splitByPeriodEtc(body, max_c_per_anno_page);
+  
+  //using the improved splitByPeriodEtc version as below
+  let pages = splitAnnouncementIntoSlides(body)
 
   return { title: title.trim(), pages: pages };
 }
@@ -551,19 +551,12 @@ function processWorshipEmail(msg, srRowToInsert) {
   return annoArray;
 }
 
+function processAnnouncementsDeepSeekAPI(attachment, annoArray) {
+  //announcementMessages is just the messages needed to go to the ppt, whatever is in the annoArray
+  let announcementMessages = extractAnnouncementsDeepSeekAPI(attachment, annoArray);
 
-function processAnnouncements(attachment, annoArray) {
-  let pdfFile = attachment.getName();
-  logMessage(`${getCallStackTrace()}: Parsing PDF file: ${pdfFile}`);
-
-  let fileText = pdfToText(attachment.copyBlob(), { keepTextfile: false });
-  logMessage(`${getCallStackTrace()}: Converted PDF to text: ${fileText}`);
-
-  let announcementsSection = fileText.split("報告事項")[1] || "";
-  let announcementMessages = parseAnnouncements(announcementsSection);
-
-  logMessage(`${getCallStackTrace()}: Extracted announcements: ${JSON.stringify(announcementMessages)}`);
-  saveAnnouncementsToSS(announcementMessages, annoArray);
+  logMessage(`${getCallStackTrace()}: Extracted announcements using Deep Seek API: ${JSON.stringify(announcementMessages)}`);
+  saveAnnouncementsToSS(announcementMessages);
 }
 
 function notifyCompletion(foundInvocation) {

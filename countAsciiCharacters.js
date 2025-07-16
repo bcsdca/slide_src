@@ -1,4 +1,4 @@
-function countAsciiCharacters(input) {
+/*function countAsciiCharacters(input) {
   let asciiCount = 0;
   for (let i = 0; i < input.length; i++) {
     let charCode = input.charCodeAt(i);
@@ -7,4 +7,4 @@ function countAsciiCharacters(input) {
     }
   }
   return asciiCount;
-}
+}*/

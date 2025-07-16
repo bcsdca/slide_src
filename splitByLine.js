@@ -5,6 +5,8 @@
 //p_in is the invo/scripture array to scan
 //mostly used for invo/scripture reading section
 //each page on allowed l(6) lines of verses
+//chars_per_line = 18 global variable
+//maxLinePerSlide = 7 global variable
 
 function splitByLine(p_in) {
   
