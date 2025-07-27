@@ -77,23 +77,35 @@ function createPassageSlide(passage) {
   //Remove the master slide if you no longer need it.
   scripture_masterSlide.remove();
   SlidesApp.openById(passage_dstId).saveAndClose();
+  
   //share this slide with cantoneseworship@cec-sd.org
   //DriveApp.getFileById(passage_dstId).addEditor("cantoneseworship@cec-sd.org");
-  Drive.Permissions.insert(
-    {
-      role: "writer",            // or "reader" for view-only
-      type: "user",
-      value: "cantoneseworship@cec-sd.org"
-    },
-    passage_dstId,
-    {
-      sendNotificationEmails: false
+  const editors = [
+    "cantoneseworship@cec-sd.org",
+    "josephliang@cec-sd.org"
+  ];
+  
+  editors.forEach(email => {
+      try {
+      Drive.Permissions.insert(
+        {
+          role: "writer",
+          type: "user",
+          value: email
+        },
+        passage_dstId,
+        {
+          sendNotificationEmails: false
+        }
+      );
+      logMessageError(getCallStackTrace() + `: Inserted Drive Editor Permission for: ${email}`);
+    } catch (e) {
+      logMessageError(getCallStackTrace() + `: Error inserting Drive Editor Permission for ${email}: ${e.message}`);
     }
-  );
+  });
+
   logMessage(getCallStackTrace() + " : Done with creating the scripture passages slides !!!");
 
-
   SpreadsheetApp.getActive().toast("Yea, Done with creating the scripture passages slides !!!", "👍");
-
 
 }

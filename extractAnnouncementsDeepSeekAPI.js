@@ -29,7 +29,9 @@ function extractAnnouncementsDeepSeekAPI(pdfBlob, annoArray) {
     });
 
     const result = JSON.parse(response.getContentText());
-    const raw = result.choices[0].message.content.trim();
+    var raw = result.choices[0].message.content.trim();
+    //looking for cec sd,org, this is caused by there is a newline after cec in pdf text
+    raw = raw.replace(/cec\s+sd\.org/gi, 'cec-sd.org');
     announcements.push(raw);
 
     logMessage(`${getCallStackTrace()}: Extracted announcement #${number} = ${raw}`);
@@ -50,6 +52,7 @@ function extractTextFromPDFViaGoogleDoc(blob) {
   const doc = DocumentApp.openById(file.id);
   const text = doc.getBody().getText();
   DriveApp.getFileById(file.id).setTrashed(true); // Clean up
+  logMessage(`${getCallStackTrace()}: Attachement BLOB converted to Google Doc to text = ${JSON.stringify(text, null, 2)}`);
   return text;
 }
 
@@ -59,12 +62,15 @@ The following is the full text of a church bulletin:
 
 """${pdfText}"""
 
-Please extract the full content of announcement number ${announcementNumber}. 
-Return only that announcement in this format:
+Please extract only announcement number ${announcementNumber}. 
+The format should match the original, beginning with:
 
-${announcementNumber}. Title
-Content...
+${announcementNumber}. <title><punctuation> <content>
 
-Preserve line breaks and original formatting. Do not include any other announcements.
+Make sure the announcement starts with "${announcementNumber}." followed by the title and body on the **same line** unless the original had line breaks.
+
+Do not add any line breaks unless they are already present in the original.
+Do not include any other announcements.
 `.trim();
 }
+

@@ -155,8 +155,9 @@ function populateWorshipTab(isTesting = false) {
   var msg = splitGmailMsg(message);
   //dumpArray(msg);
   var annoArray = processWorshipEmail(msg, srRowToInsert);
-
+  
   // Process Announcements
+  //processAnnouncements(attachment, annoArray);
   processAnnouncementsDeepSeekAPI(attachment, annoArray);
 
   // Final Spreadsheet Update
@@ -262,6 +263,7 @@ function isEndOfAnnouncements(currentLine, msg, index) {
     return true;
   }
 }
+
 function parseAnnouncements(text) {
   // Split announcements by their numbered bullets
   var announcements = text.split(/\s*\d+\.\s*/).filter(Boolean);
@@ -549,6 +551,20 @@ function processWorshipEmail(msg, srRowToInsert) {
   }
 
   return annoArray;
+}
+
+function processAnnouncements(attachment, annoArray) {
+  let pdfFile = attachment.getName();
+  logMessage(`${getCallStackTrace()}: Parsing PDF file: ${pdfFile}`);
+
+  let fileText = pdfToText(attachment.copyBlob(), { keepTextfile: false });
+  logMessage(`${getCallStackTrace()}: Converted PDF to text: ${fileText}`);
+
+  let announcementsSection = fileText.split("報告事項")[1] || "";
+  let announcementMessages = parseAnnouncements(announcementsSection);
+
+  logMessage(`${getCallStackTrace()}: Extracted announcements: ${JSON.stringify(announcementMessages)}`);
+  saveAnnouncementsToSS(announcementMessages, annoArray);
 }
 
 function processAnnouncementsDeepSeekAPI(attachment, annoArray) {

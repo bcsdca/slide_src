@@ -16,7 +16,7 @@ function onOpen(e) {
 
 function createPassagePPTSidebar() {
   var widget = HtmlService.createTemplateFromFile("htmlPassage").evaluate();
-  widget.setTitle("Select Scripture Passage To Generate PPT");
+  widget.setTitle("Select Scripture Passage To Generate Google Slides");
   widget.setWidth(500);
   SpreadsheetApp.getUi().showSidebar(widget);
 }
