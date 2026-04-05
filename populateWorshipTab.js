@@ -107,7 +107,12 @@ function populateWorshipTab(isTesting = false) {
   }
 
   if (!successFinding2Emails) {
-    handleMissingEmails();
+    if (!isTesting) {
+      logMessage(getCallStackTrace() + `: Not finding both emails. but the testing mode is ${isTesting}, so will set trigger and proceed to keep looking for both emails !!!`);
+      handleMissingEmails();
+    } else {
+      logMessage(getCallStackTrace() + `: Not finding both emails. but the testing mode is ${isTesting}, so exiting right-a-away !!!`);
+    }
     return;
   }
 
@@ -155,7 +160,7 @@ function populateWorshipTab(isTesting = false) {
   var msg = splitGmailMsg(message);
   //dumpArray(msg);
   var annoArray = processWorshipEmail(msg, srRowToInsert);
-  
+
   // Process Announcements
   //processAnnouncements(attachment, annoArray);
   processAnnouncementsDeepSeekAPI(attachment, annoArray);
@@ -318,7 +323,7 @@ function parseAnnouncementMessage(message) {
 
   // Split body into pages based on a maximum character limit
   //let pages = splitByPeriodEtc(body, max_c_per_anno_page);
-  
+
   //using the improved splitByPeriodEtc version as below
   let pages = splitAnnouncementIntoSlides(body)
 
@@ -521,15 +526,18 @@ function processWorshipEmail(msg, srRowToInsert) {
   for (let index = 0; index < msg.length; index++) {
     let currentLine = msg[index].trim();
 
-    if (!parsingStarted) {
-      if (/We\s*will\s*have\s*an\s*in-person\s*worship/i.test(currentLine)) {
+    /*if (!parsingStarted) {
+      //if (/We\s*will\s*have\s*an\s*in-person\s*worship/i.test(currentLine)) {
+      //if (/We\s*will\s*.*?\s*an\s*in-person\s*worship/i.test(currentLine)) {
+        //if (/in-person\s*worship/i.test(currentLine)) {
         logMessage(`${getCallStackTrace()}: We found Emily's email starting line to start regexp parsing: ${currentLine}`);
         parsingStarted = true;
       }
       continue;
-    }
+    }*/
 
     if (currentLine.includes("Reading")) {
+      parsingStarted = true;
       scriptureReadingTitle = processScriptureReading(msg, index, srRowToInsert);
     } else if (currentLine.includes("Sermon")) {
       sermonTitle = processSermon(msg, index);

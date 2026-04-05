@@ -21,7 +21,9 @@ function test_passageCapture(p) {
   //var my_passage = "歌羅西書 2:1-5"
   //var my_passage = "雅各書 4:1-10"
   //var my_passage = "詩篇 92:1-5,8"
-  var my_passage = "哥林多前書 13:4-8a";
+  //var my_passage = "哥林多前書 13:4-8a";
+  //var my_passage = "以賽亞書 45:5a";
+  var my_passage = "彼得前書1Peter 2:4-10";
 
   passageCapture(my_passage)
   

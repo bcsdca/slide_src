@@ -1,16 +1,3 @@
-// version 8 fixing the weekend of the month problem for the comining week (11/25/2022)
-// version 10 removing passage_dstId, just created a new one each time, and dont needed to clean the old one
-// just duplicate over the passage_srcid
-
-//this is used on slide_remove_copy function
-//srcId is the passage_template slide to be restored from
-//needed to change it every year, for new theme and if you have created a new template (1/13/2023)
-//const passage_srcid = "1warCrMpJQJsjBQTRitQj_tXoMEji4bqUvrZExRfSS0c";
-//srcId is the current working passage slide
-//const passage_dstId = "148hLdiJtmuO30zOHEZBkck65fZjrRFIsqxqWEE7wePY";
-//change the calculation of the weekofthemonth calculation (12/31/2022)
-//copy of the create_sermon_slide10, just using the scripture reading section
-
 function createPassageSlide(passage) {
 
   //clearLogSheet();
@@ -77,16 +64,10 @@ function createPassageSlide(passage) {
   //Remove the master slide if you no longer need it.
   scripture_masterSlide.remove();
   SlidesApp.openById(passage_dstId).saveAndClose();
-  
-  //share this slide with cantoneseworship@cec-sd.org
-  //DriveApp.getFileById(passage_dstId).addEditor("cantoneseworship@cec-sd.org");
-  const editors = [
-    "cantoneseworship@cec-sd.org",
-    "josephliang@cec-sd.org"
-  ];
-  
+
+  //editors is global variable
   editors.forEach(email => {
-      try {
+    try {
       Drive.Permissions.insert(
         {
           role: "writer",
@@ -98,10 +79,11 @@ function createPassageSlide(passage) {
           sendNotificationEmails: false
         }
       );
-      logMessageError(getCallStackTrace() + `: Inserted Drive Editor Permission for: ${email}`);
+      logMessage(getCallStackTrace() + `: Inserted Drive Editor Permission for: ${email}`);
     } catch (e) {
       logMessageError(getCallStackTrace() + `: Error inserting Drive Editor Permission for ${email}: ${e.message}`);
     }
+
   });
 
   logMessage(getCallStackTrace() + " : Done with creating the scripture passages slides !!!");

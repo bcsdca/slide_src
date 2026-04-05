@@ -16,7 +16,7 @@ function splitAnnouncementIntoSlides(announcement) {
       }, [])
   ).filter(chunk => chunk.trim().length > 0);
 
-  logMessageError(`${getCallStackTrace()}: 💬 Cleaned Chunks = ${JSON.stringify(chunks, null, 2)}`);
+  logMessage(`${getCallStackTrace()}: 💬 Cleaned Chunks = ${JSON.stringify(chunks, null, 2)}`);
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
@@ -25,15 +25,15 @@ function splitAnnouncementIntoSlides(announcement) {
     const asciiCount = countAsciiCharacters(chunk);
     const effectiveCount = chunk.length - asciiCount + (asciiCount * 5) / 8;
 
-    logMessageError(`${getCallStackTrace()}: 📦 Chunk ${i + 1}: "${chunk.trim()}"`);
-    logMessageError(`${getCallStackTrace()}: 🔢 Length = ${chunk.length}, ASCII = ${asciiCount}, Effective = ${effectiveCount}`);
-    logMessageError(`${getCallStackTrace()}: 📊 Running total if added = ${currentCharCount + effectiveCount} (Limit = ${maxEffectiveChars})`);
+    logMessage(`${getCallStackTrace()}: 📦 Chunk ${i + 1}: "${chunk.trim()}"`);
+    logMessage(`${getCallStackTrace()}: 🔢 Length = ${chunk.length}, ASCII = ${asciiCount}, Effective = ${effectiveCount}`);
+    logMessage(`${getCallStackTrace()}: 📊 Running total if added = ${currentCharCount + effectiveCount} (Limit = ${maxEffectiveChars})`);
 
     if (currentCharCount + effectiveCount > maxEffectiveChars && currentChunks.length > 0) {
       const slideText = currentChunks.join("");
-      logMessageError(`${getCallStackTrace()}: 🚨 Exceeds max chars. Committing current slide.`);
-      logMessageError(`${getCallStackTrace()}: 📝 Slide content: "${slideText}"`);
-      logMessageError(`${getCallStackTrace()}: 🔢 Slide char count: ${currentCharCount}`);
+      logMessage(`${getCallStackTrace()}: 🚨 Exceeds max chars. Committing current slide.`);
+      logMessage(`${getCallStackTrace()}: 📝 Slide content: "${slideText}"`);
+      logMessage(`${getCallStackTrace()}: 🔢 Slide char count: ${currentCharCount}`);
       resultSlides.push(slideText);
       currentChunks.length = 0;
       currentCharCount = 0;
@@ -46,13 +46,13 @@ function splitAnnouncementIntoSlides(announcement) {
   // Final slide
   if (currentChunks.length > 0) {
     const finalSlideText = currentChunks.join("");
-    logMessageError(`${getCallStackTrace()}: ✅ Final slide committed`);
-    logMessageError(`${getCallStackTrace()}: 📝 Slide content: "${finalSlideText}"`);
-    logMessageError(`${getCallStackTrace()}: 🔢 Slide char count: ${currentCharCount}`);
+    logMessage(`${getCallStackTrace()}: ✅ Final slide committed`);
+    logMessage(`${getCallStackTrace()}: 📝 Slide content: "${finalSlideText}"`);
+    logMessage(`${getCallStackTrace()}: 🔢 Slide char count: ${currentCharCount}`);
     resultSlides.push(finalSlideText);
   }
   
-  logMessageError(`${getCallStackTrace()}: resultSlides return = ${JSON.stringify(resultSlides, null, 2)}`);
+  logMessage(`${getCallStackTrace()}: resultSlides return = ${JSON.stringify(resultSlides, null, 2)}`);
   return resultSlides;
 }
 

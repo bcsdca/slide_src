@@ -1,33 +1,63 @@
-function passageToSS(p_t, p, r_p,s) {
-  //working on the scripture reading/invocation section of the spreadsheet
-  //s is the sheet name
-  var temp_passage_array = [];
-  var my_passage_array = p;
- 
-  var my_j = 0;
-  //p_t is the passage title
-  var rows_used_up = 0;
-  // curr_row point to exact row to start inserting passage
-  var curr_row = r_p;
+function passageToSS(passageTitle, versesArray, startRow, sheetName) {
+  // Write scripture passage into spreadsheet
+  // passageTitle: e.g. "以賽亞書45:5-6"
+  // versesArray: array containing verses
+  // startRow: row to begin inserting
+  // sheetName: target sheet
 
-  let sheet = SpreadsheetApp.getActive().getSheetByName(s);
-  
-  logMessage(`${getCallStackTrace()}: starting row to insert passage = ${curr_row}`);
-  
+  passageTitle = normalizePassageTitle(passageTitle);
+  logMessage(`${getCallStackTrace()}: The normalize passage title is ${passageTitle}`);
+
+  const sheet = SpreadsheetApp.getActive().getSheetByName(sheetName);
+  const timestamp = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    "yyyy-MM-dd-HH:mm:ss"
+  );
+
+  logMessage(`${getCallStackTrace()}: start inserting passage at row ${startRow}`);
+
   //splitByLine is using maxLinePerSlide = 8 defined in the global variable
-  temp_passage_array = splitByLine(my_passage_array);
-  for (my_j = 0; my_j < temp_passage_array.length; my_j++) {
-    logMessage(`${getCallStackTrace()}: Entering this scripture reading/invocation passage = ${temp_passage_array[my_j]} to spread sheet row ${curr_row}`);
-    
-    data = [p_t, temp_passage_array[my_j], Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd-HH:mm:ss')];
-    logMessage(`${getCallStackTrace()}: scripture reading data to populate the spreadsheet = ${JSON.stringify(data)}`);
-    sheet.insertRowAfter(curr_row);
-    rows_used_up++;
-    outerArray = [];//Assign empty array to variable name
-    outerArray.push(data);
-    sheet.getRange(curr_row + 1, 1, 1, 3).setBackground('white').setFontColor("black").setValues(outerArray);
-    curr_row++;
+  const lines = splitByLine(versesArray);
+
+  if (!lines || lines.length === 0) {
+    logMessage(`${getCallStackTrace()}: no passage content to insert`);
+    return 0;
   }
-logMessage(`${getCallStackTrace()}: The number of rows used up in ss = ${rows_used_up}`);
-return (rows_used_up)
+
+  // prepare rows for spreadsheet
+  const rows = lines.map(line => {
+    logMessage(`${getCallStackTrace()}: row data = ${passageTitle} | ${line} | ${timestamp}`);
+    return [passageTitle, line, timestamp];
+  });
+
+  // insert required number of rows once
+  sheet.insertRowsAfter(startRow, rows.length);
+
+  // write all data at once
+  const range = sheet.getRange(startRow + 1, 1, rows.length, 3);
+  range
+    .setValues(rows)
+    .setBackground("white")
+    .setFontColor("black");
+
+  logMessage(`${getCallStackTrace()}: rows inserted = ${rows.length}`);
+
+  return rows.length;
+}
+
+function normalizePassageTitle(title) {
+  const match = title.match(/^(.*:\d+)-(\d+)$/);
+
+  if (match) {
+    const startPart = match[1];       // e.g. 以賽亞書45:5
+    const startVerse = startPart.split(":")[1];
+    const endVerse = match[2];
+
+    if (startVerse === endVerse) {
+      return startPart;
+    }
+  }
+
+  return title;
 }

@@ -16,7 +16,8 @@ function parsePassage(passage) {
       // Extract the book name, chapter number, and verse info
       var nameChapterNumber = extractNameChapterVerse(colonIndex, str);
 
-      var bookName = nameChapterNumber[0].replace(/[\x00-\x7F]/g, "");
+      //var bookName = nameChapterNumber[0].replace(/[\x00-\x7F]/g, "");
+      var bookName = nameChapterNumber[0];
       var chapterNumber = nameChapterNumber[1];
       var verseNumberTemp = nameChapterNumber[2];
 
@@ -63,7 +64,7 @@ function parsePassage(passage) {
         var startChapter = parseInt(chapterNumber, 10); // Convert to integer if it's not already
         var endChapter = parseInt(extractDigitsBeforeIndex(verseNumber.indexOf(":"), verseNumber));
         var startChapterStartVerse = extractDigitsBeforeIndex(verseNumber.indexOf("-"), verseNumber);
-        var startChapterEndVerse = end_verse(bookName + " " + chapterNumber);
+        var startChapterEndVerse = getLastVerseOfChapter(bookName, chapterNumber);
         var endChapterStartVerse = 1;
         var endChapterEndVerse = verseNumber.substring((verseNumber.indexOf(":")) + 1);
 
@@ -107,7 +108,8 @@ function parsePassage(passage) {
       // or just verse info (12-18)
       logMessage(`${getCallStackTrace()}: Couldn't find colon on this passage \"${passage[i]}\"`);
       var endOfString = str.length;
-      var bookName = str.substring(0, str.search(/\d/)).replace(/[\x00-\x7F]/g, "");
+      //var bookName = str.substring(0, str.search(/\d/)).replace(/[\x00-\x7F]/g, "");
+      var bookName = str.substring(0, str.search(/\d/));
       if (bookName.match(/腓利門書|約翰二書|約翰三書|猶大書|俄巴底亞書/)) {
         chapterNumber = 1;
         var verseNumber = str.substring(str.search(/\d/)).replace(/[^\x00-\x7F]/g, '');
