@@ -1,11 +1,12 @@
-Step 1: 📊 Auto Populate Worship Tab (Google Apps Script)
+This project is to generate the cantonese weekly worship ppt with very minimum manual interventions, and it is maninly consist of 2 steps
 
+Step 1: 📊 Auto Populate Worship Tab (Google Apps Script)
 This project automates the process of populating a "worship" Google Sheet tab using data extracted from two Gmail sources:
 
 1. **Cantonese Worship Info Email** (Emily's email with bulletin PDF attachment)
 2. **Cantonese Worship Reminder Email** (for Invocation passage from the MC of this week)
 
-It parses invocation passages, scripture readings, sermon details, speaker info, invocation passages, and announcements, then inserts them into a structured spreadsheet format.
+It parses invocation passages, scripture readings, sermon details, speaker info,  and announcements, then inserts them into a structured spreadsheet format.
 
 ---
 
@@ -29,7 +30,7 @@ This is the core entry point.
    - Scripture reading
    - Sermon title
    - Speaker name
-7. 🧾 Extracts announcements (via DeepSeek API or PDF parsing)
+7. 🧾 Extracts announcements (via DeepSeek API and PDF parsing)
 8. 🧹 Cleans old spreadsheet data
 9. ✍️ Inserts new structured data into the "worship" sheet
 10. 🔁 Handles retries if emails are missing
@@ -85,7 +86,7 @@ If emails or invocation are missing:
 
 Step 2: 📊 Generating the weekly google worship slide
 
-- After sucessfully execuation of the above function populateWorshipTab() in Step 1 
+- After sucessful execution of the above function populateWorshipTab() in Step 1 
 - Another function "createWorshipSlide() was ran to generate the weekly worship google slide
 - This worship google slide should have all the basics of the weekly worship info, except praise songs/sermon/any image/video
 - This sermon google slide was downloaded to a PC/labptop with microsoft ppt installed, and then be copy and paste to the cec_sermon_slide_master_202X, which provide all the special chinese font and the special countdown slide
