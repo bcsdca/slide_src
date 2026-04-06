@@ -98,6 +98,7 @@ This is the main entry point of the automation pipeline.
 - Supports:
   - Multi-chapter passages
   - Multi-line scripture references
+  - Split passage into slide-sized segments
   - Partial verse references (e.g., 1a, 2b) with AI assistance
 
 ---
@@ -127,7 +128,7 @@ Capabilities:
 
 ### 🔁 Retry Mechanism
 
-- Automatically triggers retries if emails are missing
+- Automatically triggers retries if one of both emails are missing
 - Uses a 15-minute time-based trigger
 - Continues retrying until Sunday
 - Stops automatically afterward
@@ -167,14 +168,12 @@ Includes:
 4. Open in Microsoft PowerPoint
 5. Copy into:
    - `cec_sermon_slide_master_202X`
-   - (Provides fonts, countdown slides, and formatting)
+   - (Provides special chinese fonts, countdown slide, and any special formatting)
 6. Save final PPT
 7. Upload to the Cantonese worship account
 
 ---
 
----
-
 ## ⚙️ Technologies Used
 
 - Google Apps Script
@@ -195,37 +194,8 @@ Includes:
 - 🔁 Fully repeatable and reliable pipeline
 
 ---
-
 ## 📌 Notes
 
 - The Google Sheet acts as a temporary staging layer, not long-term storage.
 - The system mimics the human workflow as closely as possible.
-- AI is used only where parsing ambiguity exists (e.g., announcements).
----
-
-## ⚙️ Technologies Used
-
-- Google Apps Script
-- Gmail API (via Apps Script)
-- Google Sheets API (via Apps Script)
-- Google Slides API (via Apps Script)
-- DeepSeek API (AI-assisted parsing)
-- Custom Bible datasets (local)
-
----
-
-## 💡 Key Benefits
-
-- ⏱ Reduces manual preparation time
-- ✅ Ensures consistency across weeks
-- 🤖 Automates repetitive workflows
-- 📉 Minimizes human error
-- 🔁 Fully repeatable and reliable pipeline
-
----
-
-## 📌 Notes
-
-- The Google Sheet acts as a temporary staging layer, not long-term storage.
-- The system mimics the human workflow as closely as possible.
-- AI is used only where parsing ambiguity exists (e.g., announcements).
+- AI is used only where parsing ambiguity exists (e.g., email parsing, partial verse partitioning, announcements extraction).
