@@ -140,6 +140,8 @@ Capabilities:
 ### 🎬 `createWorshipSlide()`
 
 This function generates Google Slides from the structured data in the Google Sheet.
+This step required the worship ppt preparation co-worker to select drop down function 
+name "Generate Coming Sunday's Worship Slides" from top banner "CEC Slide Automation" on the google sheet 
 
 ---
 
@@ -148,9 +150,12 @@ This function generates Google Slides from the structured data in the Google She
 Includes:
 
 - Invocation  
+- Offering slides
+- Apostle Creed or Lords Prayer slide for the 2nd or 4th week of the month
 - Scripture readings  
 - Sermon title  
 - Speaker name  
+- Communion slide if it is the 1st week of the month
 - Announcements  
 
 ❌ Excluded:
@@ -162,9 +167,9 @@ Includes:
 
 ## 🖥 Final Workflow
 
-1. Run `populateWorshipTab()`
-2. Run `createWorshipSlide()`
-3. Export Google Slides as PowerPoint (.pptx)
+1. Run `populateWorshipTab()` (this is done automatically, setup and retry every 15 min by the GAS trigger)
+2. Run `createWorshipSlide()` (run by pull down selection)
+3. Export Google Slides as PowerPoint (.pptx) (manual steps)
 4. Open in Microsoft PowerPoint
 5. Copy into:
    - `cec_sermon_slide_master_202X`

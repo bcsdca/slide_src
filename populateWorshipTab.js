@@ -12,13 +12,12 @@ function populateWorshipTab(isTesting = false) {
   var today_temp = new Date();
   var coming_sunday_offset_from_today = 7 - today.getDay()
 
-  //var coming_sunday_emily = fix_d(coming_sunday);
-  var coming_sunday_emily = Utilities.formatDate(new Date(today_temp.setDate(today.getDate() + coming_sunday_offset_from_today)), Session.getScriptTimeZone(), 'M/d/yyyy');
+  var coming_sunday = Utilities.formatDate(new Date(today_temp.setDate(today.getDate() + coming_sunday_offset_from_today)), Session.getScriptTimeZone(), 'M/d/yyyy');
 
   var today_temp = new Date();
   var coming_sunday = Utilities.formatDate(new Date(today_temp.setDate(today.getDate() + coming_sunday_offset_from_today)), Session.getScriptTimeZone(), 'MM/dd/yyyy');
 
-  logMessage(`${getCallStackTrace()}: This coming sunday emily email is ${coming_sunday_emily}`)
+  logMessage(`${getCallStackTrace()}: This coming sunday is ${coming_sunday}`)
 
   var successFinding2Emails = true;
   const { worshipQuery, cantQuery } = getQueries(isTesting); // pass false for normal
@@ -28,7 +27,7 @@ function populateWorshipTab(isTesting = false) {
     logMessage(`${getCallStackTrace()}: worshipQuery = ${worshipQuery}, with isTesting = ${isTesting} `);
 
     var threads = GmailApp.search(worshipQuery);
-    logMessage(getCallStackTrace() + `: Total # of threads = ${threads.length}, for Emilys's \"worship info c\" email`)
+    logMessage(getCallStackTrace() + `: Total # of threads = ${threads.length}, for \"worship info c\" email`)
     //var threads = GmailApp.search("worship info C-07302023", 0, 1);
     var message_length = threads[0].getMessages().length;
     //message will have all the message in the thread
@@ -51,14 +50,14 @@ function populateWorshipTab(isTesting = false) {
 
     if (find_pdf) {
       logMessage(getCallStackTrace()
-        + `: Emily's email subject is \"${threads[0].getMessages()[0].getSubject()}\", and it's email message length is ${threads[0].getMessages()[0].getSubject()}, and the attachment file name is \"${attachment.getName()}\"`)
+        + `: "Worship info C"'s email subject is \"${threads[0].getMessages()[0].getSubject()}\", and it's email message length is ${threads[0].getMessages()[0].getSubject()}, and the attachment file name is \"${attachment.getName()}\"`)
     } else {
       logMessageError(getCallStackTrace() + ": Can't find the Cantonese bulletin pdf attachment!!!")
       successFinding2Emails = false;
     }
 
   } catch (err) {
-    logMessageError(getCallStackTrace() + ': GmailApp.search thread error for Emily\'s worship info C: ' + err);
+    logMessageError(getCallStackTrace() + ': GmailApp.search thread error for "worship info C": ' + err);
     successFinding2Emails = false;
   }
 
@@ -263,7 +262,7 @@ function sermonSpeakerToSS(sermonTitle, scriptureReadingTitle, speakerName) {
 function isEndOfAnnouncements(currentLine, msg, index) {
   // Check if currentLine indicates the end of announcements (e.g., next section's keyword)
   // Add your own conditions based on what typically follows the announcements
-  if (currentLine.includes("Emily Ip")) { // Example condition
+  if (currentLine.includes("Chinese Evangelical Church of San Diego")) { // Example condition
     logMessage(getCallStackTrace() + `: End of the anouncement condition found here on this line \"${currentLine}\" !!!`)
     return true;
   }
@@ -525,17 +524,7 @@ function processWorshipEmail(msg, srRowToInsert) {
 
   for (let index = 0; index < msg.length; index++) {
     let currentLine = msg[index].trim();
-
-    /*if (!parsingStarted) {
-      //if (/We\s*will\s*have\s*an\s*in-person\s*worship/i.test(currentLine)) {
-      //if (/We\s*will\s*.*?\s*an\s*in-person\s*worship/i.test(currentLine)) {
-        //if (/in-person\s*worship/i.test(currentLine)) {
-        logMessage(`${getCallStackTrace()}: We found Emily's email starting line to start regexp parsing: ${currentLine}`);
-        parsingStarted = true;
-      }
-      continue;
-    }*/
-
+ 
     if (currentLine.includes("Reading")) {
       parsingStarted = true;
       scriptureReadingTitle = processScriptureReading(msg, index, srRowToInsert);
@@ -553,7 +542,7 @@ function processWorshipEmail(msg, srRowToInsert) {
   }
 
   if (!parsingStarted) {
-    logMessageError(`${getCallStackTrace()}: Bad news, can't find Emily's email starting line to start regexp parsing !!!`);
+    logMessageError(`${getCallStackTrace()}: Bad news, can't find "Worship info C" email starting line to start regexp parsing !!!`);
   } else {
     logMessage(`${getCallStackTrace()}: Captured announcement numbers: ${JSON.stringify(annoArray)}`);
   }
@@ -623,5 +612,3 @@ function handleMissingEmails() {
   }
   flushLogsToSheet();
 }
-
-
