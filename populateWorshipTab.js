@@ -2,28 +2,19 @@ function populateWorshipTab(isTesting = false) {
   SpreadsheetApp.getActive().toast("Start populating the worship tab with the worship info from 2 gmails... Please wait.", "Processing...", -1); // Show a persistent toast
   clearLogSheet();
 
+  const comingSundayStr = getComingSunday();
+
   // If isTesting is not a boolean (e.g., it's an event object because of the time trigger), force it to false
   if (typeof isTesting !== 'boolean') {
     isTesting = false;
     logMessage(`${getCallStackTrace()}: This function was called by a time trigger, so force isTesting = ${isTesting}`)
   }
 
-  var today = new Date();
-  var today_temp = new Date();
-  var coming_sunday_offset_from_today = 7 - today.getDay()
-
-  var coming_sunday = Utilities.formatDate(new Date(today_temp.setDate(today.getDate() + coming_sunday_offset_from_today)), Session.getScriptTimeZone(), 'M/d/yyyy');
-
-  var today_temp = new Date();
-  var coming_sunday = Utilities.formatDate(new Date(today_temp.setDate(today.getDate() + coming_sunday_offset_from_today)), Session.getScriptTimeZone(), 'MM/dd/yyyy');
-
-  logMessage(`${getCallStackTrace()}: This coming sunday is ${coming_sunday}`)
-
   var successFinding2Emails = true;
   const { worshipQuery, cantQuery } = getQueries(isTesting); // pass false for normal
 
   try {
-
+    // worship info c email
     logMessage(`${getCallStackTrace()}: worshipQuery = ${worshipQuery}, with isTesting = ${isTesting} `);
 
     var threads = GmailApp.search(worshipQuery);
@@ -62,7 +53,7 @@ function populateWorshipTab(isTesting = false) {
   }
 
   try {
-    //cantonese worship email
+    //cantonese worship reminder email
 
     logMessage(`${getCallStackTrace()}: cantQuery = ${cantQuery}, with isTesting = ${isTesting} `);
 
@@ -141,39 +132,188 @@ function populateWorshipTab(isTesting = false) {
 
   logMessage(`${getCallStackTrace()}: Last Row after cleanup: ${lastRow}`);
 
-  // Process Invocation Passages
-  let invoRowToInsert = findInvocationInsertRow(sheetContents);
-  let cantMsg = splitGmailMsg(cant_message);
-  let invocationPassages = extractInvocationPassages(cantMsg);
+  try {
+    // Process Invocation Passages
+    let invoRowToInsert = findInvocationInsertRow(sheetContents);
+    let cantMsg = splitGmailMsg(cant_message);
+    let invocationPassages = extractInvocationPassages(cantMsg);
 
-  if (invocationPassages.length) {
-    invoRowToInsert = saveInvocationPassages(invocationPassages, invoRowToInsert);
-    logMessage(`${getCallStackTrace()}: Invocation passages inserted successfully!`);
-  } else {
-    logMessageError(`${getCallStackTrace()}: No invocation passage found in Cantonese worship email.`);
+    if (invocationPassages.length) {
+      invoRowToInsert = saveInvocationPassages(invocationPassages, invoRowToInsert);
+      logMessage(`${getCallStackTrace()}: Invocation passages inserted successfully!`);
+    } else {
+      logMessageError(`${getCallStackTrace()}: No invocation passage found in Cantonese worship email.`);
+    }
+
+  } catch (err) {
+    logMessageError(`${getCallStackTrace()}: Error in calling findInvocationInsertRow/extractInvocationPassages/saveInvocationPassages function: ` + err);
+    safeExit();
+    //dont return if there is invocation problem
+    //return;
   }
 
-  // Process Scripture Reading, Sermon, Speaker, and Announcements
-  // findScriptureReadingRow will re-read the whole sheet to make sure the invocation row get updated
-  let srRowToInsert = findScriptureReadingRow();
-  var msg = splitGmailMsg(message);
-  //dumpArray(msg);
-  var annoArray = processWorshipEmail(msg, srRowToInsert);
-
-  // Process Announcements
-  //processAnnouncements(attachment, annoArray);
-  processAnnouncementsDeepSeekAPI(attachment, annoArray);
-
-  // Final Spreadsheet Update
-  sheetContents = sheet.getDataRange().getValues();
-  lastRow = sheetContents.length;
-  logMessage(`${getCallStackTrace()}: Last Row after inserting new data: ${lastRow}`);
-
-  if (isTesting === false) {
-    notifyCompletion(invocationPassages.length > 0);
+  try {
+    // Process Scripture Reading, Sermon, Speaker, and Announcements
+    // findScriptureReadingRow will re-read the whole sheet to make sure the invocation row get updated
+    let srRowToInsert = findScriptureReadingRow();
+    var msg = splitGmailMsg(message);
+    //dumpArray(msg);
+    var annoArray = processWorshipEmail(msg, srRowToInsert);
+  } catch (err) {
+    logMessageError(`${getCallStackTrace()}: Error in calling splitGmailMsg/processWorshipEmail function: ` + err);
+    safeExit();
+    return;
   }
 
+  try {
+    // Process Announcements
+    //processAnnouncements(attachment, annoArray);
+    processAnnouncementsDeepSeekAPI(attachment, annoArray);
+
+  } catch (err) {
+    logMessageError(`${getCallStackTrace()}: Error in calling processAnnouncementsDeepSeekAPI function: ` + err);
+    safeExit();
+    return;
+  }
+
+  //if (isTesting === false) {
+  //worship tab at this point has everthing updated, but just in case somone has not send the invocation passage in yet
+  //then we have to go back and look for the invocation passage again
+  //chk invocation passage is populate or not, if not, then go back and look for the reminder mail
+  //to keep looking for the invocation passage
+
+  //  chkInvocationPassage(invocationPassages.length > 0);
+  //}
+
+  // ✅ Run createWorshipSlide ONLY if everything above succeeded
+  createWorshipSlideAndSendEmail(comingSundayStr)
+  
+  //delete trigger after an successful send email
+  delete_trigger_5m();
+  SpreadsheetApp.getActive().toast(`Done populating worship tab/creating worship slide/and send email to the ppt preparaton co-worker`, "👍");
   flushLogsToSheet();
+}
+
+function getPPTAssigneeInfo(comingSundayStr) {
+  const ss = SpreadsheetApp.openById(weeklyShare);
+  const sheet = ss.getSheetByName("handoff");
+
+  if (!sheet) {
+    logMessage(`${getCallStackTrace()}: Sheet "handoff" not found in spreadsheet ${weeklyShare}`);
+    throw new Error(`Sheet "handoff" not found in spreadsheet ${weeklyShare}`);
+  }
+
+  const data = sheet.getDataRange().getValues();
+
+  const normalize = d =>
+    Utilities.formatDate(new Date(d), Session.getScriptTimeZone(), "MM/dd/yyyy");
+
+  for (let i = 1; i < data.length; i++) {
+    const rowDate = normalize(data[i][0]);
+
+    if (rowDate === comingSundayStr) {
+      const name = data[i][1];   // Column B
+      const email = data[i][2];  // Column C
+
+      if (!name || !email) {
+        logMessage(`${getCallStackTrace()}: Missing name/email for ${comingSundayStr} at row ${i + 1}`);
+        throw new Error(`Missing name/email for ${comingSundayStr} at row ${i + 1}`);
+      }
+
+      logMessage(`${getCallStackTrace()}: Found assignee ${name} (${email})`);
+      return { name, email };
+    }
+  }
+  logMessage(`${getCallStackTrace()}: No row found for date: ${comingSundayStr}`);
+  throw new Error(`No row found for date: ${comingSundayStr}`);
+}
+
+function createWorshipSlideAndSendEmail(comingSundayStr) {
+
+  try {
+    logMessage(`${getCallStackTrace()}: Calling createWorshipSlide...`);
+    const worshipSlideMaster = getWorshipSlideMaster();
+    const result = createWorshipSlide();
+    clearLogSheet();
+    if (result) {
+
+      try {
+        const { name, email } = getPPTAssigneeInfo(comingSundayStr);
+
+        GmailApp.sendEmail(
+          email, // TO: assignee
+          "Worship PPT Preparation Simplified for " + comingSundayStr,
+          "", // plain text fallback
+          {
+            cc: "shui.bill.chu@gmail.com,andylucychu@gmail.com", // 👈 copy bill and andy
+            htmlBody: `
+            <p>Dear ${name},</p>
+
+            <p>We’ve simplified the worship slide preparation process a bit further.</p>
+            <p>
+            When you click the link below, it will download this week's worship slide with the .pptx format to your computer's download folder.
+            <p>
+            <b>Download this weekly worship PPTX file here:</b><br>
+            <a href="${result.pptUrl}">${result.pptUrl}</a>
+            </p>
+            </p> This link is automatically sent to you once the slides are created.
+            </p> 
+            <p>You can then just copy and paste(use destination theme) the content into this cec worship slide master template below:
+            <br>
+            <a href="${worshipSlideMaster.download}">
+            <b>Download ${worshipSlideMaster.name}</b>
+            </a>            
+            <p>
+            This means you no longer need to log in to the cantoneseworship account initially.
+            However, you will still need to log in later to upload the final slides.
+            </p>
+            <p>If you have any questions, feel free to reach out.</p>
+
+            <p>Blessing!</p>
+            <p>Cantonese Worship Team</p>
+      `
+          }
+        );
+
+        logMessage(`${getCallStackTrace()}: Email sent to ${name} (${email}), CC to self`);
+
+      } catch (err) {
+        logMessageError(`${getCallStackTrace()}: Failed to send personalized email: ` + err);
+
+        // Optional fallback: send to yourself only
+        GmailApp.sendEmail(
+          "shui.bill.chu@gmail.com",
+          "Fallback: PPTX Ready for " + comingSundayStr,
+          `Could not find assignee. Error:\n${err}\n\nLink:\n${result.pptUrl}`
+        );
+        safeExit();
+        return;
+      }
+
+    } else {
+      logMessage(`${getCallStackTrace()}: Skipping email because slide URL is empty.`);
+    }
+  } catch (err) {
+    logMessageError(`${getCallStackTrace()}: Error in createWorshipSlide/sendEmail: ` + err);
+    safeExit();
+    return;
+  }
+}
+
+function getWorshipSlideMaster() {
+  const file = DriveApp.getFileById(worshipSlideMasterId);
+
+  return {
+    name: file.getName(),
+    download: `https://drive.google.com/uc?export=download&id=${worshipSlideMasterId}`,
+    view: `https://drive.google.com/file/d/${worshipSlideMasterId}/view`
+  };
+}
+
+function safeExit() {
+  //logMessage(message);
+  flushLogsToSheet();
+  SpreadsheetApp.getActive().toast("Error Stopped ⚠️", 5);
 }
 
 //all the helper functions below
@@ -524,7 +664,7 @@ function processWorshipEmail(msg, srRowToInsert) {
 
   for (let index = 0; index < msg.length; index++) {
     let currentLine = msg[index].trim();
- 
+
     if (currentLine.includes("Reading")) {
       parsingStarted = true;
       scriptureReadingTitle = processScriptureReading(msg, index, srRowToInsert);
@@ -572,7 +712,7 @@ function processAnnouncementsDeepSeekAPI(attachment, annoArray) {
   saveAnnouncementsToSS(announcementMessages);
 }
 
-function notifyCompletion(foundInvocation) {
+function chkInvocationPassage(foundInvocation) {
   if (foundInvocation) {
     SpreadsheetApp.getActive().toast("Done populating worship info on slide_src!", "👍");
     delete_trigger_5m();
@@ -612,3 +752,5 @@ function handleMissingEmails() {
   }
   flushLogsToSheet();
 }
+
+

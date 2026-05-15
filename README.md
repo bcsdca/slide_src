@@ -64,7 +64,9 @@ This is the main entry point of the automation pipeline.
 - Processes bulletin PDF attachments
 - Writes structured data into the "worship" Google Sheet
 - Retries automatically if required emails are missing
-- Sends completion notification
+- Retries automatically if required emails are missing
+- Upon successful completion of all the functions, it will generate the worhsip slide for the week in google slide format
+- It will also send the sermon ppt preparation co-worker email with the link to the newly created worship google slide
 
 ---
 
@@ -169,13 +171,14 @@ Includes:
 
 1. Run `populateWorshipTab()` (this is done automatically, setup and retry every 15 min by the GAS trigger)
 2. Run `createWorshipSlide()` (run by pull down selection)
-3. Export Google Slides as PowerPoint (.pptx) (manual steps)
-4. Open in Microsoft PowerPoint
-5. Copy into:
+3. Export Google Slides as PowerPoint (.pptx) (manual steps below are done outside of this project)
+4. The above 3 steps were automatially done by the main function populateWorshipTab function now
+5. Open in Microsoft PowerPoint
+6. Copy into:
    - `cec_sermon_slide_master_202X`
    - (Provides special chinese fonts, countdown slide, and any special formatting)
-6. Save final PPT
-7. Upload to the Cantonese worship account
+7. Save final PPT
+8. Upload to the Cantonese worship account
 
 ---
 
@@ -201,6 +204,6 @@ Includes:
 ---
 ## 📌 Notes
 
-- The Google Sheet acts as a temporary staging layer, not long-term storage.
+- The Google Sheet acts as a temporary staging layer, a placeholder, not long-term storage.
 - The system mimics the human workflow as closely as possible.
 - AI is used only where parsing ambiguity exists (e.g., email parsing, partial verse partitioning, announcements extraction).

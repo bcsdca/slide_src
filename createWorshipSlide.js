@@ -69,10 +69,23 @@ function createWorshipSlide() {
 
   deck.saveAndClose();
   logMessage(`${getCallStackTrace()}: Slides for this Sunday's worship have been successfully created.`);
-  flushLogsToSheet();
 
-  //SpreadsheetApp.getActive().setActiveSheet(sheet); // keep the view at the worship
+  const slideUrl = `https://docs.google.com/presentation/d/${worshipDstId}`;
+  const pptUrl = `https://docs.google.com/presentation/d/${worshipDstId}/export/pptx`;
+
+  logMessage(`${getCallStackTrace()}: Slides created successfully.`);
+  logMessage(`${getCallStackTrace()}: PPT download link = ${pptUrl}`);
+   
+  //set the google slide to anyone with link can view
+  setAnyoneWithLinkCanView(worshipDstId);
+  
+  flushLogsToSheet();
   SpreadsheetApp.getActive().toast("Slides for this Sunday's worship have been successfully created.", "Success 👍", "5");
+  // return BOTH (recommended)
+  return {
+    slideUrl: slideUrl,
+    pptUrl: pptUrl
+  };
 }
 
 function createSlides(deck, contents, masterSlideTitle, slideMappings) {
