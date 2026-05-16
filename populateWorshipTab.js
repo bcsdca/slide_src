@@ -185,9 +185,11 @@ function populateWorshipTab(isTesting = false) {
   //  chkInvocationPassage(invocationPassages.length > 0);
   //}
 
-  // ✅ Run createWorshipSlide ONLY if everything above succeeded
-  createWorshipSlideAndSendEmail(comingSundayStr)
-  
+  // ✅ Run createWorshipSlide ONLY if everything above succeeded, and not testing
+  if (isTesting === false) {
+    createWorshipSlideAndSendEmail(comingSundayStr)
+  }
+
   //delete trigger after an successful send email
   delete_trigger_5m();
   SpreadsheetApp.getActive().toast(`Done populating worship tab/creating worship slide/and send email to the ppt preparaton co-worker`, "👍");
