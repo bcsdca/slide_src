@@ -6,7 +6,9 @@ function breakDownVerses(input) {
   const result = [];
 
   for (const part of parts) {
-    const range = part.split('-').map(p => p.trim());
+    //regular expression that recognizes multiple dash characters
+    const range = part.split(/[-–—－]/).map(p => p.trim());
+    //const range = part.split('-').map(p => p.trim());
 
     if (range.length === 1) {
       const val = range[0];

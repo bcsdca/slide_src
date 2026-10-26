@@ -207,3 +207,4 @@ Includes:
 - The Google Sheet acts as a temporary staging layer, a placeholder, not long-term storage.
 - The system mimics the human workflow as closely as possible.
 - AI is used only where parsing ambiguity exists (e.g., email parsing, partial verse partitioning, announcements extraction).
+- For an unrelated event, addition of handoff tab, to capture the weekly sermon email info, and create a sermon image with an embedded sermon title/passage text using the chatgpt image capture API and the saved it on Bill's google drive, also save the image info on this tab, as well as, who is the MC and powerpoint prepartaion person of this week, for the purpose of sending an abbreveiated google sermon slide to Grace Chu, and sending an exported intial sermon ppt to the person who prepare this week's sermon ppt.

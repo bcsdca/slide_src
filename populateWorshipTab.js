@@ -18,35 +18,41 @@ function populateWorshipTab(isTesting = false) {
     logMessage(`${getCallStackTrace()}: worshipQuery = ${worshipQuery}, with isTesting = ${isTesting} `);
 
     var threads = GmailApp.search(worshipQuery);
-    logMessage(getCallStackTrace() + `: Total # of threads = ${threads.length}, for \"worship info c\" email`)
+    logMessage(getCallStackTrace() + `: Total # of threads = ${threads.length}, for \"worship info C\" email`)
     //var threads = GmailApp.search("worship info C-07302023", 0, 1);
-    var message_length = threads[0].getMessages().length;
-    //message will have all the message in the thread
-    var message = "";
-    for (var j = 0; j < message_length; j++) {
-      //var message = message.concat(threads[0].getMessages()[j].getPlainBody());
-      var message = threads[0].getMessages()[j].getPlainBody().concat(message);
-    }
-
-    var find_pdf = false;
-    for (var i = 0; (i < message_length && !find_pdf); i++) {
-      var msg = threads[0].getMessages()[i]
-      if (msg.getAttachments()[0] != undefined) {
-        if (msg.getAttachments()[0].getContentType().match("pdf")) {
-          find_pdf = true;
-          var attachment = threads[0].getMessages()[i].getAttachments()[0];
-        }
-      }
-    }
-
-    if (find_pdf) {
-      logMessage(getCallStackTrace()
-        + `: "Worship info C"'s email subject is \"${threads[0].getMessages()[0].getSubject()}\", and it's email message length is ${threads[0].getMessages()[0].getSubject()}, and the attachment file name is \"${attachment.getName()}\"`)
-    } else {
-      logMessageError(getCallStackTrace() + ": Can't find the Cantonese bulletin pdf attachment!!!")
+    // Check if any threads are found
+    if (threads.length === 0) {
+      logMessage(`${getCallStackTrace()}: No worship info c email thread found.`);
       successFinding2Emails = false;
     }
+    else {
+      var message_length = threads[0].getMessages().length;
+      //message will have all the message in the thread
+      var message = "";
+      for (var j = 0; j < message_length; j++) {
+        //var message = message.concat(threads[0].getMessages()[j].getPlainBody());
+        var message = threads[0].getMessages()[j].getPlainBody().concat(message);
+      }
 
+      var find_pdf = false;
+      for (var i = 0; (i < message_length && !find_pdf); i++) {
+        var msg = threads[0].getMessages()[i]
+        if (msg.getAttachments()[0] != undefined) {
+          if (msg.getAttachments()[0].getContentType().match("pdf")) {
+            find_pdf = true;
+            var attachment = threads[0].getMessages()[i].getAttachments()[0];
+          }
+        }
+      }
+
+      if (find_pdf) {
+        logMessage(getCallStackTrace()
+          + `: "Worship info C"'s email subject is \"${threads[0].getMessages()[0].getSubject()}\", and it's email message length is ${threads[0].getMessages()[0].getSubject()}, and the attachment file name is \"${attachment.getName()}\"`)
+      } else {
+        logMessageError(getCallStackTrace() + ": Can't find the Cantonese bulletin pdf attachment!!!")
+        successFinding2Emails = false;
+      }
+    }
   } catch (err) {
     logMessageError(getCallStackTrace() + ': GmailApp.search thread error for "worship info C": ' + err);
     successFinding2Emails = false;
@@ -57,51 +63,46 @@ function populateWorshipTab(isTesting = false) {
 
     logMessage(`${getCallStackTrace()}: cantQuery = ${cantQuery}, with isTesting = ${isTesting} `);
 
-    var cant_threads = GmailApp.search(cantQuery);
-    logMessage(getCallStackTrace() + `: Total # of threads = ${cant_threads.length} for cantonese worship reminder email`)
+    const cantThreads = GmailApp.search(cantQuery);
 
-    // Get the most recent cant_threads
-    var latestThread = cant_threads[0];
+    // Check if any threads are found
+    if (cantThreads.length === 0) {
+      logMessage(`${getCallStackTrace()}: No Cantonese worship reminder email thread found.`);
+      successFinding2Emails = false;
+    }
+    else {
+      // Get the latest thread
+      const latestThread = cantThreads.reduce((latest, thread) =>
+        thread.getLastMessageDate() > latest.getLastMessageDate() ? thread : latest
+      );
 
-    // Loop through the cant_threads to find the latest one
-    for (var i = 1; i < cant_threads.length; i++) {
-      if (cant_threads[i].getLastMessageDate() > latestThread.getLastMessageDate()) {
-        latestThread = cant_threads[i];
+      const latestSubject = latestThread.getFirstMessageSubject();
+      logMessage(getCallStackTrace() + `: The Cantonese worship reminder email subject found is "${latestSubject}"`);
+
+      const messages = latestThread.getMessages();
+      const messageLength = messages.length;
+
+      var cantEmailContent = "";
+
+      // Combine all messages into one (without extra newlines)
+      for (let j = 0; j < messageLength; j++) {
+        cantEmailContent = messages[j].getPlainBody().concat(cantEmailContent);
       }
+
+      logMessage(`${getCallStackTrace()}: Extracted Cantonese worship reminder email content = ${cantEmailContent}`);
     }
-
-    // Get the latest cantonese worship reminder email message in the thread
-    var latestMessage = latestThread.getMessages().pop();
-
-    // Log the subject and date of the latest cantonese worship reminder email
-    logMessage(getCallStackTrace() + ": Latest cantonese worship email reminder subject: " + latestMessage.getSubject());
-    logMessage(getCallStackTrace() + ": Received on: " + latestMessage.getDate());
-
-    var cant_message = "";
-    var cant_message_length = latestThread.getMessages().length;
-    for (var j = 0; j < cant_message_length; j++) {
-      //var cant_message = cant_message.concat(latestThread.getMessages()[j].getPlainBody());
-      //logMessage(getCallStackTrace() + ": The Cantonese worship reminder email message" + j + ": " + latestThread.getMessages()[j].getPlainBody());
-      var cant_message = latestThread.getMessages()[j].getPlainBody().concat(cant_message);
-      //logMessage(getCallStackTrace() + ": The %d message of this thread is \"%s\"", j, latestThread.getMessages()[j].getPlainBody() );
-    }
-
-    logMessage(getCallStackTrace() + `: The Cantonese worship reminder email subject is ${latestThread.getMessages()[0].getSubject()}", and it's email message length is ${cant_message_length}`);
-
-    //logMessage(getCallStackTrace() + ": The Cantonese worship reminder email message is \"%s\"", cant_message);
-
 
   } catch (err) {
-    logMessageError(getCallStackTrace() + ': GmailApp.search thread error : Cantonese Sunday Service Reminder' + err);
+    logMessageError(getCallStackTrace() + ': GmailApp.search thread error : Cantonese worship reminder email' + err);
     successFinding2Emails = false;
   }
 
   if (!successFinding2Emails) {
     if (!isTesting) {
-      logMessage(getCallStackTrace() + `: Not finding both emails. but the testing mode is ${isTesting}, so will set trigger and proceed to keep looking for both emails !!!`);
+      logMessage(getCallStackTrace() + `: Not finding both emails or not finding pdf file. but the testing mode is ${isTesting}, so will set trigger and proceed to keep looking for both emails !!!`);
       handleMissingEmails();
     } else {
-      logMessage(getCallStackTrace() + `: Not finding both emails. but the testing mode is ${isTesting}, so exiting right-a-away !!!`);
+      logMessage(getCallStackTrace() + `: Not finding both emails or not finding pdf file. but the testing mode is ${isTesting}, so exiting right-a-away !!!`);
     }
     return;
   }
@@ -135,7 +136,7 @@ function populateWorshipTab(isTesting = false) {
   try {
     // Process Invocation Passages
     let invoRowToInsert = findInvocationInsertRow(sheetContents);
-    let cantMsg = splitGmailMsg(cant_message);
+    let cantMsg = splitGmailMsg(cantEmailContent);
     let invocationPassages = extractInvocationPassages(cantMsg);
 
     if (invocationPassages.length) {
@@ -197,12 +198,11 @@ function populateWorshipTab(isTesting = false) {
 }
 
 function getPPTAssigneeInfo(comingSundayStr) {
-  const ss = SpreadsheetApp.openById(weeklyShare);
-  const sheet = ss.getSheetByName("handoff");
 
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("handoff");
   if (!sheet) {
-    logMessage(`${getCallStackTrace()}: Sheet "handoff" not found in spreadsheet ${weeklyShare}`);
-    throw new Error(`Sheet "handoff" not found in spreadsheet ${weeklyShare}`);
+    logMessageError(`${getCallStackTrace()}: Error - 'handoff' sheet not found!`);
+    return;
   }
 
   const data = sheet.getDataRange().getValues();
@@ -218,15 +218,50 @@ function getPPTAssigneeInfo(comingSundayStr) {
       const email = data[i][2];  // Column C
 
       if (!name || !email) {
-        logMessage(`${getCallStackTrace()}: Missing name/email for ${comingSundayStr} at row ${i + 1}`);
-        throw new Error(`Missing name/email for ${comingSundayStr} at row ${i + 1}`);
+        logMessage(`${getCallStackTrace()}: Missing PPT preparation name/email for ${comingSundayStr} at row ${i + 1}`);
+        throw new Error(`Missing PPT preparation name/email for ${comingSundayStr} at row ${i + 1}`);
       }
 
-      logMessage(`${getCallStackTrace()}: Found assignee ${name} (${email})`);
+      logMessage(`${getCallStackTrace()}: Found PPT preparation assignee ${name} (${email})`);
       return { name, email };
     }
   }
   logMessage(`${getCallStackTrace()}: No row found for date: ${comingSundayStr}`);
+  throw new Error(`No row found for date: ${comingSundayStr}`);
+}
+
+function getMCAssigneeInfo(comingSundayStr) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("handoff");
+
+  if (!sheet) {
+    logMessageError(`${getCallStackTrace()}: Error - 'handoff' sheet not found!`);
+    return null;
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const normalize = d => Utilities.formatDate(new Date(d), Session.getScriptTimeZone(), "MM/dd/yyyy");
+
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0] || normalize(data[i][0]) !== comingSundayStr) continue;
+
+    const name = data[i][5];   // Column F
+    const email = data[i][6];  // Column G
+
+    if (name !== "Grace Chu") {
+      logMessage(`${getCallStackTrace()}: MC for ${comingSundayStr} is "${name}", not Grace Chu.`);
+      return null;
+    }
+
+    if (!email) {
+      logMessageError(`${getCallStackTrace()}: Grace Chu is MC for ${comingSundayStr}, but her email is missing at row ${i + 1}.`);
+      throw new Error(`Missing email address for Grace Chu at row ${i + 1}`);
+    }
+
+    logMessage(`${getCallStackTrace()}: Grace Chu is MC for ${comingSundayStr}; email = ${email}`);
+    return { name, email };
+  }
+
+  logMessageError(`${getCallStackTrace()}: No row found for date: ${comingSundayStr}`);
   throw new Error(`No row found for date: ${comingSundayStr}`);
 }
 
@@ -240,10 +275,11 @@ function createWorshipSlideAndSendEmail(comingSundayStr) {
     if (result) {
 
       try {
-        const { name, email } = getPPTAssigneeInfo(comingSundayStr);
+        //sending powerpoint preparation person email
+        var { name, email } = getPPTAssigneeInfo(comingSundayStr);
 
         GmailApp.sendEmail(
-          email, // TO: assignee
+          email, // TO: PPT preparation assignee
           "Worship PPT Preparation Simplified for " + comingSundayStr,
           "", // plain text fallback
           {
@@ -251,14 +287,14 @@ function createWorshipSlideAndSendEmail(comingSundayStr) {
             htmlBody: `
             <p>Dear ${name},</p>
 
-            <p>We’ve simplified the worship slide preparation process a bit further.</p>
+            <p>We’ve simplified the worship slide preparation process a bit more.</p>
             <p>
             When you click the link below, it will download this week's worship slide with the .pptx format to your computer's download folder.
             <p>
             <b>Download this weekly worship PPTX file here:</b><br>
             <a href="${result.pptUrl}">${result.pptUrl}</a>
             </p>
-            </p> This link is automatically sent to you once the slides are created.
+            </p> The above link is automatically generated when the slides are created successfully.
             </p> 
             <p>You can then just copy and paste(use destination theme) the content into this cec worship slide master template below:
             <br>
@@ -267,7 +303,10 @@ function createWorshipSlideAndSendEmail(comingSundayStr) {
             </a>            
             <p>
             This means you no longer need to log in to the cantoneseworship account initially.
-            However, you will still need to log in later to upload the final slides.
+            However, you will still need to log in later to upload the final ppt slides.
+            </p>
+            <p>
+            After you uploaded this ppt file, please change the general access for "anyone with the link" can "view" this file.
             </p>
             <p>If you have any questions, feel free to reach out.</p>
 
@@ -277,16 +316,56 @@ function createWorshipSlideAndSendEmail(comingSundayStr) {
           }
         );
 
-        logMessage(`${getCallStackTrace()}: Email sent to ${name} (${email}), CC to self`);
+        //sending MC(Grace Chu) worship slide email
+        var { name, email } = getMCAssigneeInfo(comingSundayStr);
+
+        GmailApp.sendEmail(
+          email, // TO: MC assignee
+          `Special Abbreviated Worship Slide Deck for ${comingSundayStr}`,
+          "", // Required argument; recipients will see the HTML body below
+          {
+            cc: "shui.bill.chu@gmail.com,andylucychu@gmail.com",
+            htmlBody: `
+            <p>Dear ${name},</p>
+
+            <p>
+            We are sending you an abbreviated version of this week's worship
+            slide deck. It does not include the countdown, praise-song, or
+            sermon slides.
+            </p>
+
+            <p>
+            Click the link below to open the deck in Google Slides. It should
+            work on your computer, iPad, or phone.
+            </p>
+
+            <p>
+            <a href="${result.slideUrl}">
+            Open the abbreviated worship slide deck
+            </a>
+            </p>
+
+            <p>
+            This link is generated automatically after the slides are
+            successfully created.
+            </p>
+
+            <p>Blessings!</p>
+            <p>Cantonese Worship Team</p>
+    `
+          }
+        );
+
+        logMessage(`${getCallStackTrace()}: Special shortened worship google slide Email sent to ${name} (${email}), CC to self`);
 
       } catch (err) {
-        logMessageError(`${getCallStackTrace()}: Failed to send personalized email: ` + err);
+        logMessageError(`${getCallStackTrace()}: Failed to send PPT preparation email or this week's MC is not (Grace Chu): ` + err);
 
         // Optional fallback: send to yourself only
         GmailApp.sendEmail(
           "shui.bill.chu@gmail.com",
-          "Fallback: PPTX Ready for " + comingSundayStr,
-          `Could not find assignee. Error:\n${err}\n\nLink:\n${result.pptUrl}`
+          "Headup: Failed to send PPT preparation email or this week's MC is not (Grace Chu) " + comingSundayStr,
+          `Error:\n${err}\n\nThe worship google slide Link:\n${result.pptUrl}`
         );
         safeExit();
         return;
@@ -319,7 +398,7 @@ function safeExit() {
 }
 
 //all the helper functions below
-function processScriptureReading(msg, index, sr_row_to_insert) {
+function extractScriptureReading(msg, index, sr_row_to_insert) {
   var readingLine = msg[index].replace("Reading:", "Reading").replaceAll("*", " ");
   var combinedLine = readingLine;
   //check the next line and see if it should be the continuation of the current line
@@ -328,7 +407,9 @@ function processScriptureReading(msg, index, sr_row_to_insert) {
     combinedLine += " " + msg[index + 1].replaceAll("*", " ");
   }
   logMessage(getCallStackTrace() + `: Combined line for Scripture Reading = ${combinedLine}`);
-  var arrayScriptureReading = parseScripture(combinedLine);
+  var tempCombinedLine = combinedLine.replace(/[*]/g, "").split("Reading");
+  var text = tempCombinedLine[1];
+  var arrayScriptureReading = processPassage(text);
   logMessage(getCallStackTrace() + `: Scripture Reading = ${arrayScriptureReading}`);
 
   var rowToInsert = sr_row_to_insert;
@@ -346,7 +427,9 @@ function processSermon(msg, index) {
   var sermonTitle = sermonLine;
   var nextIndex = index + 1;
 
-  while (nextIndex < msg.length && msg[nextIndex].match(/\w/) && !msg[nextIndex].includes("Speaker")) {
+  //while (nextIndex < msg.length && msg[nextIndex].match(/\w/) && !msg[nextIndex].includes("Speaker")) {
+  //concat everything until the next line is "Speaker"
+  while (nextIndex < msg.length && !msg[nextIndex].includes("Speaker")) {
     logMessage(getCallStackTrace() + `: The next sermon line is NOT empty, and is = ${msg[nextIndex]}`);
     sermonTitle += " " + msg[nextIndex].replace(",", "").trim();
     nextIndex++;
@@ -357,7 +440,27 @@ function processSermon(msg, index) {
 
 function processSpeaker(msg, index) {
   var speakerLine = msg[index].replace("Speaker:", "Speaker").replaceAll("*", " ").trim();
+  logMessage(getCallStackTrace() + `: The speaker line is = ${speakerLine.split('Speaker')[1].trim()}`);
   return speakerLine.split('Speaker')[1].trim();
+}
+
+//this is replacing extractLastNumber function
+function extractAnnouncementNumber(inputString) {
+  if (typeof inputString !== 'string') {
+    return null;
+  }
+
+  // Preferred format: extract the number immediately after "#"
+  var match = inputString.match(/#\s*(\d+)/);
+
+  if (match) {
+    return match[1];
+  }
+
+  // Fallback format: "3. Announcement..."
+  match = inputString.match(/^\s*(\d+)\s*\./);
+
+  return match ? match[1] : null;
 }
 
 function extractLastNumber(inputString) {
@@ -557,13 +660,6 @@ function findInvocationInsertRow(sheetContents) {
   return sheetContents.length + 1; // Default to the end of the sheet if not found
 }
 
-function isValidInvocation(line) {
-  return (
-    /Call\s*to\s*worship\s*[:]/i.test(line) && // Matches "Call to worship:"
-    !/1xx|similar format|modify the content|\*\*\*/i.test(line)   // Avoids "1xx", "similar format", "modify the content" and "***"
-  );
-}
-
 function saveInvocationPassages(array_invo_passage, invo_row_to_insert) {
   let total_rows_used = 0;
 
@@ -638,11 +734,29 @@ function cleanupOldData(sheet, titleRows, lastRow) {
 
 function extractInvocationPassages(cantMsg) {
   for (let line of cantMsg) {
-    if (isValidInvocation(line)) {
-      logMessage(`${getCallStackTrace()}: Found invocation line: ${line}`);
-      return parseInvocation(line) || [];
+    const cleanLine = line.replace(/[*]/g, "");
+
+    if (/1xx|similar format|modify the content|\*\*\*/i.test(cleanLine)) {
+      continue;
+    }
+
+    //const match = cleanLine.match(
+    //  /Call\s*to\s*worship\s*[*]*:\s*(.+)/i
+    //);
+
+    const match = cleanLine.match(/Call\s*to\s*worship\s*[*]*\s*:?\s*(.+)/i);
+
+    if (match) {
+      const text = match[1].trim();
+
+      logMessage(
+        `${getCallStackTrace()}: Found invocation line: ${cleanLine}`
+      );
+
+      return processPassage(text) || [];
     }
   }
+
   return [];
 }
 
@@ -669,14 +783,14 @@ function processWorshipEmail(msg, srRowToInsert) {
 
     if (currentLine.includes("Reading")) {
       parsingStarted = true;
-      scriptureReadingTitle = processScriptureReading(msg, index, srRowToInsert);
+      scriptureReadingTitle = extractScriptureReading(msg, index, srRowToInsert);
     } else if (currentLine.includes("Sermon")) {
       sermonTitle = processSermon(msg, index);
     } else if (currentLine.includes("Speaker")) {
       speakerName = processSpeaker(msg, index);
       sermonSpeakerToSS(sermonTitle, scriptureReadingTitle, speakerName);
-    } else if (currentLine.match(/^\s*\d+\s*#\D*\d+/) || currentLine.match(/^\s*\d+[.]\s*/)) {
-      annoArray.push(extractLastNumber(currentLine));
+    } else if (currentLine.match(/#\s*\d+/) || currentLine.match(/^\s*\d+\s*\.\s*/)) {
+      annoArray.push(extractAnnouncementNumber(currentLine));
       announcementStarted = true;
     } else if (announcementStarted && isEndOfAnnouncements(currentLine, msg, index)) {
       break; // Stop processing and return when the 1st section of announcements end in 1st message, if there are multiple messages
@@ -754,5 +868,3 @@ function handleMissingEmails() {
   }
   flushLogsToSheet();
 }
-
-

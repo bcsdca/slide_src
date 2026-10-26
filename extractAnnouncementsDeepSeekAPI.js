@@ -11,19 +11,22 @@ function extractAnnouncementsDeepSeekAPI(pdfBlob, annoArray) {
       headers: {
         Authorization: `Bearer ${deepSeekAPIKey}`
       },
+
       payload: JSON.stringify({
-        model: 'deepseek-chat',
+        model: deepSeekModel,
         messages: [
           {
-            role: 'system',
-            content: 'You are a helpful assistant that extracts specific numbered church announcements from bulletin text.'
+            role: "system",
+            content: "You are a deterministic text extraction engine."
           },
           {
-            role: 'user',
+            role: "user",
             content: prompt
           }
         ],
-        temperature: 0.2,
+        thinking: {
+          type: "disabled"
+        },
         max_tokens: 1024
       })
     });
@@ -58,19 +61,26 @@ function extractTextFromPDFViaGoogleDoc(blob) {
 
 function buildSingleAnnouncementPrompt(pdfText, announcementNumber) {
   return `
-The following is the full text of a church bulletin:
+  You are a precise text extractor.
 
-"""${pdfText}"""
+  Task:
+  Extract ONLY announcement number ${announcementNumber} from the following church bulletin text.
 
-Please extract only announcement number ${announcementNumber}. 
-The format should match the original, beginning with:
+  STRICT RULES:
+  1. Ignore all asterisks (*) and decorative symbols.
+  2. The announcement ALWAYS begins with:
+     "${announcementNumber}. " followed by its title and content.
+  3. The output MUST start with "${announcementNumber}." as the very first characters — no text, spaces, or punctuation before it.
+  4. Stop extraction immediately before the next announcement number (like "${announcementNumber + 1}."), or before the end of the bulletin.
+  5. Preserve exact original line breaks and spacing.
+  6. Do NOT include any explanations, notes, or markdown.
+  7. If the announcement number ${announcementNumber} does not exist, return an empty string ("").
 
-${announcementNumber}. <title><punctuation> <content>
+  Output requirement:
+  Return ONLY the raw text of announcement ${announcementNumber}, starting with "${announcementNumber}. ".
 
-Make sure the announcement starts with "${announcementNumber}." followed by the title and body on the **same line** unless the original had line breaks.
-
-Do not add any line breaks unless they are already present in the original.
-Do not include any other announcements.
+  BULLETIN TEXT:
+  """${pdfText.substring(0, 15000)}"""
 `.trim();
 }
 

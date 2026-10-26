@@ -17,7 +17,8 @@ function parsePassage(passage) {
       var nameChapterNumber = extractNameChapterVerse(colonIndex, str);
 
       //var bookName = nameChapterNumber[0].replace(/[\x00-\x7F]/g, "");
-      var bookName = nameChapterNumber[0];
+      //in case the book name is all english, the it got translate to chinese
+      var bookName = normalizeChineseBook(nameChapterNumber[0])
       var chapterNumber = nameChapterNumber[1];
       var verseNumberTemp = nameChapterNumber[2];
 
@@ -109,7 +110,8 @@ function parsePassage(passage) {
       logMessage(`${getCallStackTrace()}: Couldn't find colon on this passage \"${passage[i]}\"`);
       var endOfString = str.length;
       //var bookName = str.substring(0, str.search(/\d/)).replace(/[\x00-\x7F]/g, "");
-      var bookName = str.substring(0, str.search(/\d/));
+      //support only english book name format
+      var bookName = normalizeChineseBook(str.substring(0, str.search(/\d/)).trim());
       if (bookName.match(/腓利門書|約翰二書|約翰三書|猶大書|俄巴底亞書/)) {
         chapterNumber = 1;
         var verseNumber = str.substring(str.search(/\d/)).replace(/[^\x00-\x7F]/g, '');
